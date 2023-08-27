@@ -1,6 +1,6 @@
 package com.sky;
 
-import com.sky.entity.Dish;
+import com.sky.entity.DishEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -35,16 +35,16 @@ public class ListTest {
     //3. 获取集合中所有元素的某个属性值进行拼接
     @Test
     public void test3() {
-        List<Dish> list3 = new ArrayList<>();
-        list3.add(Dish.builder().name("鱼香肉丝").build());
-        list3.add(Dish.builder().name("水煮鲫鱼").build());
-        list3.add(Dish.builder().name("清水蒸鸭").build());
+        List<DishEntity> list3 = new ArrayList<>();
+        list3.add(DishEntity.builder().name("鱼香肉丝").build());
+        list3.add(DishEntity.builder().name("水煮鲫鱼").build());
+        list3.add(DishEntity.builder().name("清水蒸鸭").build());
 
         /*List<String> collect = list3.stream().map(dish -> dish.getName()).collect(Collectors.toList());
         String dishNames = StringUtils.join(collect, ",");*/
 
         //相当于上面两行代码简写
-        String dishNames = list3.stream().map(dish -> dish.getName()).collect(Collectors.joining(","));
+        String dishNames = list3.stream().map(dishEntity -> dishEntity.getName()).collect(Collectors.joining(","));
 
         log.info("获取集合中所有元素的某个属性值进行拼接：{}", dishNames);
     }

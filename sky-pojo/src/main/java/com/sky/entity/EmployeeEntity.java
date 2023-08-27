@@ -6,28 +6,27 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * 菜品
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Dish implements Serializable {
+public class EmployeeEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private Long id;
-    private String name; //菜品名称
-    private Long categoryId;    //菜品分类id
-    private BigDecimal price;    //菜品价格
-    private String image;    //图片
-    private String description;    //描述信息
-    private Integer status;    //0 停售 1 起售
+    private String username;
+    private String name;
+    private String password;
+    private String phone;
+    private String sex;
+    private String idNumber;
+    private Integer status;
+    //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
+    //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
     private Long createUser;
     private Long updateUser;

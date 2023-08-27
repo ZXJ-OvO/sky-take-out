@@ -1,6 +1,6 @@
 package com.sky.dto;
 
-import com.sky.entity.OrderDetail;
+import com.sky.entity.OrderDetailEntity;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -25,5 +25,5 @@ public class OrdersDTO implements Serializable {
     private String phone;    //手机号
     private String address;    //地址
     private String consignee;    //收货人
-    private List<OrderDetail> orderDetails;
+    private List<OrderDetailEntity> orderDetailEntities;
 }

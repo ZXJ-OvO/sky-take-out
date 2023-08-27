@@ -1,6 +1,6 @@
 package com.sky.dto;
 
-import com.sky.entity.SetmealDish;
+import com.sky.entity.SetmealDishEntity;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -18,5 +18,5 @@ public class SetmealDTO implements Serializable {
     private Integer status;    //状态 0:停用 1:启用
     private String description;    //描述信息
     private String image;    //图片
-    private List<SetmealDish> setmealDishes = new ArrayList<>();    //套餐菜品关系
+    private List<SetmealDishEntity> setmealDishEntities = new ArrayList<>();    //套餐菜品关系
 }

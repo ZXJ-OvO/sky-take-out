@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.EmployeeMapper">
 
-    <select id="getByUsername" resultType="com.sky.entity.Employee">
+    <select id="getByUsername" resultType="com.sky.entity.EmployeeEntity">
         select *
         from employee
         where username = #{username}

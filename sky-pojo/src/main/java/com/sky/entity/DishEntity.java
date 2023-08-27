@@ -10,24 +10,25 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * 购物车
+ * 菜品
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShoppingCart implements Serializable {
+public class DishEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private Long id;
-    private String name;   //名称
-    private Long userId;    //用户id
-    private Long dishId;    //菜品id
-    private Long setmealId;    //套餐id
-    private String dishFlavor;    //口味
-    private Integer number;    //数量
-    private BigDecimal amount;    //金额
+    private String name; //菜品名称
+    private Long categoryId;    //菜品分类id
+    private BigDecimal price;    //菜品价格
     private String image;    //图片
+    private String description;    //描述信息
+    private Integer status;    //0 停售 1 起售
     private LocalDateTime createTime;
+    private LocalDateTime updateTime;
+    private Long createUser;
+    private Long updateUser;
 }

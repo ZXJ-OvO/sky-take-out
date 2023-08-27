@@ -1,6 +1,6 @@
 package com.sky.dto;
 
-import com.sky.entity.DishFlavor;
+import com.sky.entity.DishFlavorEntity;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -18,5 +18,5 @@ public class DishDTO implements Serializable {
     private String image;    //图片
     private String description;    //描述信息
     private Integer status;    //0 停售 1 起售
-    private List<DishFlavor> flavors = new ArrayList<>();    //口味
+    private List<DishFlavorEntity> flavors = new ArrayList<>();    //口味
 }

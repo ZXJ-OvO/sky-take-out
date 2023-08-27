@@ -2,6 +2,7 @@ package com.sky.constant;
 
 /**
  * 信息提示常量类
+ * @author zxj
  */
 public class MessageConstant {
 
@@ -9,6 +10,9 @@ public class MessageConstant {
     public static final String ACCOUNT_NOT_FOUND = "账号不存在";
     public static final String ACCOUNT_LOCKED = "账号被锁定";
     public static final String ALREADY_EXISTS = "已存在";
+
+    public static final String NULL_USERNAME_ERROR = "用户名为空";
+    public static final String NULL_PASSWORD_ERROR = "密码为空";
 
     public static final String UNKNOWN_ERROR = "未知错误";
     public static final String USER_NOT_LOGIN = "用户未登录";

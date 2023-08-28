@@ -35,6 +35,5 @@ public class EmployeeController {
     @PostMapping("/login")
     public Result<EmployeeLoginVO> login(@RequestBody EmployeeLoginDTO employeeLoginDTO, HttpServletRequest httpServletRequest) {
         EmployeeLoginVO employeeLoginVO = employeeService.login(employeeLoginDTO, httpServletRequest);
-        return Result.success(employeeLoginVO);
-    }
+        return Result.success(employeeLoginVO);    }
 }

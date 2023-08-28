@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author zxj
@@ -27,14 +28,13 @@ public class EmployeeController {
 
     /**
      * 员工登录
-     *
-     * @param employeeDTO 员工信息DTO
+     * @param employeeLoginDTO 员工信息DTO
+     * @param httpServletRequest httpServletRequest
      * @return 员工信息VO
      */
     @PostMapping("/login")
-    public Result login(@RequestBody EmployeeLoginDTO employeeLoginDTO) {
-        EmployeeLoginVO employeeLoginVO = employeeService.login(employeeLoginDTO);
+    public Result login(@RequestBody EmployeeLoginDTO employeeLoginDTO, HttpServletRequest httpServletRequest) {
+        EmployeeLoginVO employeeLoginVO = employeeService.login(employeeLoginDTO, httpServletRequest);
         return Result.success(employeeLoginVO);
     }
-
 }

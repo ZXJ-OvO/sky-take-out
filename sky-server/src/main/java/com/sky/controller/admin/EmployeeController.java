@@ -33,7 +33,7 @@ public class EmployeeController {
      * @return 员工信息VO
      */
     @PostMapping("/login")
-    public Result login(@RequestBody EmployeeLoginDTO employeeLoginDTO, HttpServletRequest httpServletRequest) {
+    public Result<EmployeeLoginVO> login(@RequestBody EmployeeLoginDTO employeeLoginDTO, HttpServletRequest httpServletRequest) {
         EmployeeLoginVO employeeLoginVO = employeeService.login(employeeLoginDTO, httpServletRequest);
         return Result.success(employeeLoginVO);
     }

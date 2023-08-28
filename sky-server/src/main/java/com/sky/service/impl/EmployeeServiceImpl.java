@@ -110,22 +110,23 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
         }
 
-        // 6、校验通过，给VO封装数据
-        EmployeeLoginVO employeeLoginVO = new EmployeeLoginVO();
-        employeeLoginVO.setId(employeeEntity.getId());
-        employeeLoginVO.setUserName(username);
-        employeeLoginVO.setName(employeeEntity.getName());
-
-        // 7、JWT生成token，token存入redis
+        // 6、JWT生成token，token存入redis
         Map<String, Object> claims = new HashMap<>();
         claims.put(JwtClaimsConstant.EMP_ID, employeeEntity.getId());
         claims.put(JwtClaimsConstant.USERNAME, employeeEntity.getUsername());
         claims.put(JwtClaimsConstant.NAME, employeeEntity.getName());
         String token = JwtUtil.createJWT(jwtProperties.getAdminSecretKey(), jwtProperties.getAdminTtl(), claims);
-        employeeLoginVO.setToken(token);
-        String tokenValue = JSONUtil.toJsonStr(employeeLoginVO);
+
+        // 7、校验通过，给VO封装数据
+        EmployeeLoginVO employeeLoginVO = new EmployeeLoginVO().builder()
+                .id(employeeEntity.getId())
+                .userName(username)
+                .name(employeeEntity.getName())
+                .token(token)
+                .build();
 
         // 8、设置redis缓存
+        String tokenValue = JSONUtil.toJsonStr(employeeLoginVO);
         String tokenKey = RedisConstant.LOGIN_USER_KEY + token;
         long ttl = RandomUtil.randomLong(-5, 5) + RedisConstant.LOGIN_USER_TTL;
         ops.set(tokenKey, tokenValue);
@@ -135,3 +136,4 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeLoginVO;
     }
 }
+

@@ -96,9 +96,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         // 4、校验密码
-        // String dtoPwd = DigestUtils.md5DigestAsHex(password.getBytes());
         String salt = pwdHashUtil.generateSalt();
         String dtoPwd = pwdHashUtil.hashPassword(password, salt);
+        // 表中password的原字段是varchar，长度为64，已修改为128
         String dbPwd = employeeEntity.getPassword();
         if (!dbPwd.equals(dtoPwd)) {
             // 5、密码错误，redis中的value值+2，如果value值大于3，就设置该ip的key的过期时间为30分钟

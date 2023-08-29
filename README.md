@@ -620,6 +620,98 @@ Windows下在conf/nginx.conf中
 
   ![image-20230829092909026](https://raw.githubusercontent.com/ZXJ-OvO/picgo-img/master/202308290929057.png)
 
+## Knife4j
+
+一种封装使用swagger操作的框架
+
+### Knife4j使用
+
+#### 导包
+
+```xml
+<properties>
+    <knife4j>3.0.2</knife4j>
+</properties>
+
+<dependencies>
+    <dependency>
+        <groupId>com.github.xiaoymin</groupId>
+        <artifactId>knife4j-spring-boot-starter</artifactId>
+        <version>${knife4j}</version>
+    </dependency>
+</dependencies>
+```
+
+#### 编写配置类
+
+```java
+@Configuration
+@Slf4j
+public class Knife4jConfiguration {
+
+/**
+ * 通过knife4j生成接口文档：管理端接口文件
+ */
+@Bean
+public Docket docket1() {
+        ApiInfo apiInfo = new ApiInfoBuilder()
+                .title("苍穹外卖项目接口文档")
+                .version("2.0").
+                description("苍穹外卖项目接口文档")
+                .build();
+
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo)
+                .groupName("01-管理端接口文档") //分组名称
+                .select()
+                        	//设置扫描包范围
+                .apis(RequestHandlerSelectors.basePackage("com.sky.controller.admin")) 
+                .paths(PathSelectors.any())
+                .build();
+    }
+
+
+    /**
+     * 通过knife4j生成接口文档：用户端接口文档
+     */
+    @Bean
+    public Docket docket2() {
+        ApiInfo apiInfo = new ApiInfoBuilder()
+                .title("苍穹外卖项目接口文档")
+                .version("2.0")
+                .description("苍穹外卖项目接口文档")
+                .build();
+
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo)
+                .groupName("02-用户端接口文档") //分组名称
+                .select()
+                        	//设置扫描包范围
+                .apis(RequestHandlerSelectors.basePackage("com.sky.controller.user")) 
+                .paths(PathSelectors.any())
+                .build();
+    }
+
+}
+```
+
+#### 访问http://localhost:8080/doc.html
+
+## Swagger
+
+通过注解可以控制生成的接口文档，使接口文档拥有更好的可读性，常用注解如下：
+
+| **注解**          | **说明**                                               |
+| ----------------- | ------------------------------------------------------ |
+| @Api              | 用在类上，例如Controller，表示对类的说明               |
+| @ApiModel         | 用在类上，例如entity、DTO、VO                          |
+| @ApiModelProperty | 用在属性上，描述属性信息                               |
+| @ApiOperation     | 用在方法上，例如Controller的方法，说明方法的用途、作用 |
+
+![image-20230829152205621](https://raw.githubusercontent.com/ZXJ-OvO/picgo-img/master/202308291522921.png)
+
+<img src="https://raw.githubusercontent.com/ZXJ-OvO/picgo-img/master/202308291530350.png" alt="image-20230829153056192" style="zoom: 25%;" />
+
 
 
 # 苍穹外卖

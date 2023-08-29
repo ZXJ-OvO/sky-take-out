@@ -79,14 +79,16 @@ public class EmployeeEntity implements Serializable {
     private LocalDateTime updateTime;
     /**
      * 创建人 null
+     * 设定：1001为系统管理员，为系统运营使用，其他员工由此创建
+     * 1000为超级管理员，为开发测试使用，admin账号由此创建
      */
-    @TableField(value = "create_user")
+    @TableField(fill = FieldFill.INSERT, value = "create_user")
     @ApiModelProperty(value = "创建人")
     private Long createUser;
     /**
      * 修改人 null
      */
-    @TableField(value = "update_user")
+    @TableField(fill = FieldFill.INSERT_UPDATE, value = "update_user")
     @ApiModelProperty(value = "修改人")
     private Long updateUser;
 }

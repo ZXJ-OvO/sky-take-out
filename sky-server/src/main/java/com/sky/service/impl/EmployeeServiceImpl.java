@@ -6,7 +6,9 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.sky.constant.JwtClaimsConstant;
 import com.sky.constant.MessageConstant;
+import com.sky.constant.PasswordConstant;
 import com.sky.constant.RedisConstant;
+import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.entity.EmployeeEntity;
 import com.sky.exception.AccountNotFoundException;
@@ -19,9 +21,11 @@ import com.sky.utils.JwtUtil;
 import com.sky.utils.PwdHashUtil;
 import com.sky.vo.EmployeeLoginVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -57,6 +61,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @return 员工信息VO
      */
     @Override
+    @Transactional
     public EmployeeLoginVO login(EmployeeLoginDTO employeeLoginDTO, HttpServletRequest httpServletRequest) {
         ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
 
@@ -139,6 +144,30 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         // 9、返回员工信息VO
         return employeeLoginVO;
+    }
+
+    /**
+     * 新增员工
+     *
+     * @param employeeDTO 员工信息DTO
+     */
+    @Override
+    @Transactional
+    public void insert(EmployeeDTO employeeDTO) {
+        // 1、对象属性拷贝 DTO -> Entity
+        EmployeeEntity employeeEntity = new EmployeeEntity();
+        BeanUtils.copyProperties(employeeDTO, employeeEntity);
+
+        // 2、密码加密
+        String salt = pwdHashUtil.generateSalt();
+        String password = pwdHashUtil.hashPassword(PasswordConstant.DEFAULT_PASSWORD, salt);
+
+        // 3、设置默认值，createUser、updateUser、createTime、updateTime交给MyMetaObjectHandler处理
+        employeeEntity.setPassword(password);
+        employeeEntity.setStatus(1);
+
+        // 4、插入数据库
+        employeeMapper.insert(employeeEntity);
     }
 }
 

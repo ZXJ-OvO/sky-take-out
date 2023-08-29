@@ -1,6 +1,8 @@
 package com.sky.controller.admin;
 
+import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.entity.EmployeeEntity;
 import com.sky.result.Result;
 import com.sky.service.EmployeeService;
 import com.sky.vo.EmployeeLoginVO;
@@ -48,6 +50,19 @@ public class EmployeeController {
     @ApiOperation(value = "员工登出", notes = "员工登出")
     @PostMapping("/logout")
     public Result<String> login() {
+        return Result.success();
+    }
+
+    /**
+     * 新增员工
+     *
+     * @param employeeLoginDTO 员工信息DTO
+     * @return 员工信息VO
+     */
+    @ApiOperation(value = "新增员工", notes = "新增员工")
+    @PostMapping
+    public Result<String> insert(@RequestBody EmployeeDTO employeeDTO) {
+        employeeService.insert(employeeDTO);
         return Result.success();
     }
 }

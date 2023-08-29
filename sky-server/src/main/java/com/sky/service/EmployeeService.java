@@ -1,6 +1,7 @@
 package com.sky.service;
 
 
+import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.vo.EmployeeLoginVO;
 
@@ -19,4 +20,11 @@ public interface EmployeeService {
      * @return 员工信息VO
      */
     EmployeeLoginVO login(EmployeeLoginDTO employeeDTO, HttpServletRequest httpServletRequest);
+
+    /**
+     * 新增员工
+     *
+     * @param employeeLoginDTO 员工信息DTO
+     */
+    void insert(EmployeeDTO employeeLoginDTO);
 }

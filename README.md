@@ -536,6 +536,92 @@ public RedisTemplate redisTemplate(RedisConnectionFactory redisConnectionFactory
     }
 ```
 
+
+
+## Nginx
+
+### 反向代理
+
+> nginx反向代理，即将前端发送的动态请求由nginx转发到后端服务器
+
+使用nginx反向代理的好处：
+
+1. 提高访问速度
+
+   > 在nginx中做缓存，减少到达后端服务器的请求
+
+2. 进行负载均衡
+
+   > 负载均衡：把大量的请求按照指定的方式均衡的分配给集群中的每台服务器
+
+3. 保证后端服务安全
+
+   > 前端请求并不是直接访问后端服务的
+
+
+
+### 配置反向代理
+
+> 注意：nginx.conf中的所有配置项需要以分号结尾
+
+Windows下在conf/nginx.conf中
+
+> Linux下是由conf/nginx.conf 联合 conf/conf.d/default.conf 实现的，前者会引用后者
+
+![image-20230829090357640](https://raw.githubusercontent.com/ZXJ-OvO/picgo-img/master/202308290904745.png)
+
+> - server  相当于代表一个虚拟主机
+> - listen   监听的端口号
+> - location  用于处理特定的请求
+>
+> ------
+>
+> - location /api/  代表请求中含有字符串api时就交给这里处理
+>
+> - proxy_pass  代表请求反向代理的真实地址，保留原请求接口地址，和原请求接口拼接在一起得到真实的请求地址
+>
+>   ![image-20230829090945566](https://raw.githubusercontent.com/ZXJ-OvO/picgo-img/master/202308290909619.png)
+
+
+
+### 配置负载均衡
+
+![image-20230829091107834](https://raw.githubusercontent.com/ZXJ-OvO/picgo-img/master/202308290911866.png)
+
+> 与反向代理不同的是`proxy_pass`后的地址
+>
+> 反向代理：http://localhost:8080/admin/
+>
+> 负载均衡：http://webservers/admin/
+>
+> - localhost:8080 替换成为 webservers
+>
+> ------
+>
+> - upstream  webservers 用于配置负载均衡
+> - server ip  配置proxy_pass中对应的服务器所在地址
+
+前端的服务到达Nginx后、经过反向代理来到proxy_pass，读取到proxy_pass中的webservers后，通过默认的负载均衡策略（轮询），将请求均衡的分配给拥有本次请求对应的服务的服务器群，服务器群的地址在upstream中配置
+
+
+
+### 负载均衡的策略
+
+| **名称**   | **说明**                                                     |
+| ---------- | ------------------------------------------------------------ |
+| 轮询       | 默认方式  （你一个，我一个）                                 |
+| weight     | 权重方式，给每台服务器设置一个权重值，默认为1，权重越高，被分配的客户端请求就越多 |
+| ip_hash    | 依据ip分配方式，这样每个访客可以固定访问一个后端服务         |
+| least_conn | 依据最少连接方式，把请求优先分配给连接数少的后端服务         |
+| url_hash   | 依据url分配方式，这样相同的url会被分配到同一个后端服务       |
+| fair       | 依据响应时间方式，响应时间短的服务将会被优先分配             |
+
+- 配置指定权重方式
+
+  ![image-20230829092909026](https://raw.githubusercontent.com/ZXJ-OvO/picgo-img/master/202308290929057.png)
+
+
+
 # 苍穹外卖
 
 > 本专栏用于记录开发过程中的疑难杂症和重要事项以及心得体会

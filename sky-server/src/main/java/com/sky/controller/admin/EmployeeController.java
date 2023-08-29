@@ -5,6 +5,7 @@ import com.sky.result.Result;
 import com.sky.service.EmployeeService;
 import com.sky.vo.EmployeeLoginVO;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,6 +33,7 @@ public class EmployeeController {
      * @param httpServletRequest httpServletRequest
      * @return 员工信息VO
      */
+    @ApiOperation(value = "员工登录", notes = "员工登录")
     @PostMapping("/login")
     public Result<EmployeeLoginVO> login(@RequestBody EmployeeLoginDTO employeeLoginDTO, HttpServletRequest httpServletRequest) {
         EmployeeLoginVO employeeLoginVO = employeeService.login(employeeLoginDTO, httpServletRequest);

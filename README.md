@@ -697,6 +697,8 @@ public Docket docket1() {
 
 #### 访问http://localhost:8080/doc.html
 
+
+
 ## Swagger
 
 通过注解可以控制生成的接口文档，使接口文档拥有更好的可读性，常用注解如下：
@@ -708,9 +710,13 @@ public Docket docket1() {
 | @ApiModelProperty | 用在属性上，描述属性信息                               |
 | @ApiOperation     | 用在方法上，例如Controller的方法，说明方法的用途、作用 |
 
-![image-20230829152205621](https://raw.githubusercontent.com/ZXJ-OvO/picgo-img/master/202308291522921.png)
+![image-20230829155043278](https://raw.githubusercontent.com/ZXJ-OvO/picgo-img/master/202308291550589.png)
 
 <img src="https://raw.githubusercontent.com/ZXJ-OvO/picgo-img/master/202308291530350.png" alt="image-20230829153056192" style="zoom: 25%;" />
+
+![image-20230829155126064](https://raw.githubusercontent.com/ZXJ-OvO/picgo-img/master/202308291551154.png)
+
+![image-20230829155242552](https://raw.githubusercontent.com/ZXJ-OvO/picgo-img/master/202308291552664.png)
 
 
 

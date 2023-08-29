@@ -39,4 +39,15 @@ public class EmployeeController {
         EmployeeLoginVO employeeLoginVO = employeeService.login(employeeLoginDTO, httpServletRequest);
         return Result.success(employeeLoginVO);
     }
+
+    /**
+     * 员工登出
+     *
+     * @return null
+     */
+    @ApiOperation(value = "员工登出", notes = "员工登出")
+    @PostMapping("/logout")
+    public Result<String> login() {
+        return Result.success();
+    }
 }

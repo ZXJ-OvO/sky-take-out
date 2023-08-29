@@ -16,12 +16,12 @@ import com.sky.mapper.EmployeeMapper;
 import com.sky.properties.JwtProperties;
 import com.sky.service.EmployeeService;
 import com.sky.utils.JwtUtil;
+import com.sky.utils.PwdHashUtil;
 import com.sky.vo.EmployeeLoginVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -44,6 +44,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Resource
     private JwtProperties jwtProperties;
+
+    @Resource
+    private PwdHashUtil pwdHashUtil;
 
 
     /**
@@ -93,7 +96,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         // 4、校验密码
-        String dtoPwd = DigestUtils.md5DigestAsHex(password.getBytes());
+        // String dtoPwd = DigestUtils.md5DigestAsHex(password.getBytes());
+        String salt = pwdHashUtil.generateSalt();
+        String dtoPwd = pwdHashUtil.hashPassword(password, salt);
         String dbPwd = employeeEntity.getPassword();
         if (!dbPwd.equals(dtoPwd)) {
             // 5、密码错误，redis中的value值+2，如果value值大于3，就设置该ip的key的过期时间为30分钟

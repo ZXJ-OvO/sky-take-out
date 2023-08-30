@@ -2,13 +2,13 @@ package com.sky.controller.admin;
 
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
-import com.sky.entity.EmployeeEntity;
 import com.sky.result.Result;
 import com.sky.service.EmployeeService;
 import com.sky.vo.EmployeeLoginVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,7 +61,7 @@ public class EmployeeController {
      */
     @ApiOperation(value = "新增员工", notes = "新增员工")
     @PostMapping
-    public Result<String> insert(@RequestBody EmployeeDTO employeeDTO) {
+    public Result<String> insert(@RequestBody @Validated EmployeeDTO employeeDTO) {
         employeeService.insert(employeeDTO);
         return Result.success();
     }

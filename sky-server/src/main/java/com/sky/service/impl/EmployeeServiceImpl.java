@@ -1,6 +1,8 @@
 package com.sky.service.impl;
 
+import cn.hutool.core.util.IdcardUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.crypto.digest.BCrypt;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -12,13 +14,13 @@ import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.entity.EmployeeEntity;
 import com.sky.exception.AccountNotFoundException;
+import com.sky.exception.InvalidFieldException;
 import com.sky.exception.LoginFailedException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
 import com.sky.properties.JwtProperties;
 import com.sky.service.EmployeeService;
 import com.sky.utils.JwtUtil;
-import com.sky.utils.PwdHashUtil;
 import com.sky.vo.EmployeeLoginVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -48,10 +50,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Resource
     private JwtProperties jwtProperties;
-
-    @Resource
-    private PwdHashUtil pwdHashUtil;
-
 
     /**
      * 员工登录
@@ -101,11 +99,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         // 4、校验密码
-        String salt = pwdHashUtil.generateSalt();
-        String dtoPwd = pwdHashUtil.hashPassword(password, salt);
+        String dtoPwd = employeeLoginDTO.getPassword();
         // 表中password的原字段是varchar，长度为64，已修改为128
         String dbPwd = employeeEntity.getPassword();
-        if (!dbPwd.equals(dtoPwd)) {
+        if (!BCrypt.checkpw(dtoPwd, dbPwd)) {
             // 5、密码错误，redis中的value值+2，如果value值大于3，就设置该ip的key的过期时间为30分钟
             if (wrongTime == null) {
                 ops.set(identifier, "1");
@@ -154,20 +151,26 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional
     public void insert(EmployeeDTO employeeDTO) {
-        // 1、对象属性拷贝 DTO -> Entity
+
+        // 1、Hutool身份校验工具类校验身份证，其他字段交给validator校验
+        String idNumber = employeeDTO.getIdNumber();
+        if (!IdcardUtil.isValidCard(idNumber)) {
+            throw new InvalidFieldException("本系统仅支持中国大陆18位、15位和港澳台10位身份证号");
+        }
+
+        // 2、对象属性拷贝 DTO -> Entity
         EmployeeEntity employeeEntity = new EmployeeEntity();
         BeanUtils.copyProperties(employeeDTO, employeeEntity);
 
-        // 2、密码加密
-        String salt = pwdHashUtil.generateSalt();
-        String password = pwdHashUtil.hashPassword(PasswordConstant.DEFAULT_PASSWORD, salt);
+        // 3、密码加密，Hutool封装了BCrypt，不需要再引入相关依赖
+        String salt = BCrypt.gensalt();
+        String password = BCrypt.hashpw(PasswordConstant.DEFAULT_PASSWORD, salt);
 
-        // 3、设置默认值，createUser、updateUser、createTime、updateTime交给MyMetaObjectHandler处理
+        // 4、设置默认值，createUser、updateUser、createTime、updateTime交给MyMetaObjectHandler处理
         employeeEntity.setPassword(password);
         employeeEntity.setStatus(1);
 
-        // 4、插入数据库
+        // 5、插入数据库
         employeeMapper.insert(employeeEntity);
     }
 }
-

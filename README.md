@@ -720,6 +720,181 @@ public Docket docket1() {
 
 
 
+## Mybatis Plus
+
+### 引入依赖
+
+```xml
+<dependency>
+    <groupId>com.baomidou</groupId>
+    <artifactId>mybatis-plus-boot-starter</artifactId>
+    <version>3.5.3.1</version>
+</dependency>
+```
+
+### 添加包扫描
+
+Mybatis Plus需要手动在启动类上添加mapper包扫描
+
+```java
+@Slf4j
+@SpringBootApplication
+@MapperScan("com.sky.mapper")
+public class SkyApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(SkyApplication.class, args);
+    }
+}
+```
+
+### Mapper接口继承BaseMapper\<xxxEntity>
+
+操作哪张表就添加对应的泛型约束
+
+```java
+@Mapper
+public interface EmployeeMapper extends BaseMapper<EmployeeEntity> {
+}
+```
+
+### 添加Mybatis Plus配置类
+
+> 配置类中可以用来配置各种插件，如分页插件
+
+```java
+@Configuration
+@MapperScan("com.sky.mapper")
+public class MybatisPlusConfig {
+    
+    // 分页插件
+    @Bean
+    public MybatisPlusInterceptor mybatisPlusInterceptor() {
+        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
+        return interceptor;
+    }
+}
+```
+
+注意修改包扫描、数据库类型
+
+
+
+### 注解
+
+#### @TableName  表名注解
+
+```java
+@TableName("sys_user")
+public class User {
+}
+```
+
+
+
+#### @TableId  主键注解
+
+```java
+@TableName("sys_user")
+public class User {
+    @TableId(type = IdType.AUTO)
+    private Long id;
+}
+```
+
+> 该注解常用的属性 type 用于指定id的增长策略，策略是IdType的枚举类型
+
+常用的IdType
+
+| 值          | 描述                                                         |
+| ----------- | ------------------------------------------------------------ |
+| AUTO        | 数据库 ID 自增                                               |
+| NONE        | 无状态，该类型为未设置主键类型（注解里等于跟随全局，全局里约等于 INPUT） |
+| INPUT       | insert 前自行 set 主键值                                     |
+| ASSIGN_ID   | 分配 ID(主键类型为 Number(Long 和 Integer)或 String)(since 3.3.0),使用接口`IdentifierGenerator`的方法`nextId`(默认实现类为`DefaultIdentifierGenerator`雪花算法) |
+| ASSIGN_UUID | 分配 UUID,主键类型为 String(since 3.3.0),使用接口`IdentifierGenerator`的方法`nextUUID`(默认 default 方法) |
+
+> 除此之外还有用于分布式的全局ID，32位UUID字符串，分布式全局唯一ID，有这种业务需求时，可以直接使用ASSIGN_ID代替，需要32位UUID使用ASSIGN_UUID代替
+
+
+
+#### @TableField  字段注解（非主键）
+
+```java
+@TableName("sys_user")
+public class User {
+    @TableField("nickname")
+    private String name;
+}
+```
+
+常用属性
+
+> 下列属性全部默认不用必须指定，s为String、b为boolean、e为Enum、t为true、f为false
+
+| 属性   | 类型 | 默认值            | 描述                                                         |
+| ------ | ---- | ----------------- | ------------------------------------------------------------ |
+| value  | s    | ""                | 数据库字段名                                                 |
+| exist  | b    | t                 | 是否为数据库表字段                                           |
+| fill   | e    | FieldFill.Default | 字段自动填充策略                                             |
+| update | s    | ""                | 字段 `update set` 部分注入，例如：当在version字段上注解`update="%s+1"` 表示更新时会 `set version=version+1` （该属性优先级高于 `el` 属性） |
+| select | b    | t                 | 是否参与 select 查询                                         |
+
+FieldFill.Default
+
+| 值            | 描述                 |
+| ------------- | -------------------- |
+| DEFAULT       | 默认不处理           |
+| INSERT        | 插入时填充字段       |
+| UPDATE        | 更新时填充字段       |
+| INSERT_UPDATE | 插入和更新时填充字段 |
+
+
+
+#### @Version 乐观锁注解
+
+用于字段
+
+
+
+#### @TableLogic  表字段逻辑处理注解（逻辑删除）
+
+| 属性   | 类型   | 必须指定 | 默认值 | 描述         |
+| ------ | ------ | -------- | ------ | ------------ |
+| value  | String | 否       | ""     | 逻辑未删除值 |
+| delval | String | 否       | ""     | 逻辑删除值   |
+
+
+
+#### OrderBy注解  内置 SQL 默认指定排序，优先级低于 wrapper 条件查询
+
+| 属性   | 类型    | 必须指定 | 默认值          | 描述           |
+| ------ | ------- | -------- | --------------- | -------------- |
+| isDesc | boolean | 否       | true            | 是否倒序查询   |
+| sort   | short   | 否       | Short.MAX_VALUE | 数字越小越靠前 |
+
+
+
+### 公共字段自动更新维护
+
+```java
+@Component
+public class MyMetaObjectHandler implements MetaObjectHandler {
+    @Override
+    public void insertFill(MetaObject metaObject) {
+        this.setFieldValByName("createTime", new Date(), metaObject);
+        this.setFieldValByName("updateTime", new Date(), metaObject);
+    }
+
+    @Override
+    public void updateFill(MetaObject metaObject) {
+        this.setFieldValByName("updateTime", new Date(), metaObject);
+    }
+}
+```
+
+
+
 # 苍穹外卖
 
 > 本专栏用于记录开发过程中的疑难杂症和重要事项以及心得体会

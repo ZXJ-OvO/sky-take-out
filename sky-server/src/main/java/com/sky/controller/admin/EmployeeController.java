@@ -56,7 +56,7 @@ public class EmployeeController {
     /**
      * 新增员工
      *
-     * @param employeeLoginDTO 员工信息DTO
+     * @param employeeDTO 员工信息DTO
      * @return 员工信息VO
      */
     @ApiOperation(value = "新增员工", notes = "新增员工")

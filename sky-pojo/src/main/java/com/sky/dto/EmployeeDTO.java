@@ -27,7 +27,7 @@ public class EmployeeDTO implements Serializable {
     @Pattern(regexp = "^1(3\\d|4[5-9]|5[0-35-9]|6[2567]|7[0-8]|8\\d|9[0-35-9])\\d{8}$", message = "手机号格式不满足当前中国大陆号段要求")
     private String phone;
     @ApiModelProperty(value = "性别")
-    @Pattern(regexp = "^(1|0)$", message = "性别仅支持'男'或'女'")
+    @Pattern(regexp = "^([10])$", message = "性别仅支持'男'或'女'")
     private String sex;
     @ApiModelProperty(value = "身份证号")
     private String idNumber;

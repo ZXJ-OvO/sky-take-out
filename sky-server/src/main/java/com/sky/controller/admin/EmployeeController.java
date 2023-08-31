@@ -3,6 +3,7 @@ package com.sky.controller.admin;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.entity.EmployeeEntity;
 import com.sky.result.PageBean;
 import com.sky.result.Result;
 import com.sky.service.EmployeeService;
@@ -76,5 +77,25 @@ public class EmployeeController {
     public Result<PageBean> pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
         PageBean pageBean = employeeService.pageQuery(employeePageQueryDTO);
         return Result.success(pageBean);
+    }
+
+    /**
+     * 根据id查询员工
+     *
+     * @param id 员工id
+     * @return 员工信息
+     */
+    @ApiOperation(value = "根据id查询员工", notes = "根据id查询员工")
+    @GetMapping("/{id}")
+    public Result<EmployeeEntity> selectById(@PathVariable Long id) {
+        EmployeeEntity employee = employeeService.selectById(id);
+        return Result.success(employee);
+    }
+
+    @ApiOperation(value = "更新员工", notes = "编辑员工信息")
+    @PutMapping
+    public Result<EmployeeEntity> update(@RequestBody @Validated EmployeeDTO employeeDTO) {
+        employeeService.update(employeeDTO);
+        return Result.success();
     }
 }

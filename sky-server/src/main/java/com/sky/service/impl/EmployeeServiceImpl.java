@@ -200,6 +200,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (name != null && !name.isEmpty()) {
             queryWrapper.like("name", name);
         }
+        queryWrapper.orderByDesc("update_time");
 
         // 3、分页查询
         Page<EmployeeEntity> pageWrapper = new Page<>(page, pageSize);
@@ -209,13 +210,34 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 4、查询总记录数
         Long total = employeeMapper.selectCount(queryWrapper);
 
-        // 5、封装分页查询结果
-        PageBean pageBean = PageBean.builder()
+        // 5、封装返回分页查询结果
+        return PageBean.builder()
                 .total(total)
                 .records(list)
                 .build();
+    }
 
-        // 6、返回分页查询结果
-        return pageBean;
+    /**
+     * 根据id查询员工信息
+     *
+     * @param id 员工id not null
+     * @return 员工信息
+     */
+    @Override
+    public EmployeeEntity selectById(Long id) {
+        if (id == null) {
+            throw new InvalidFieldException("id不能为空");
+        }
+        EmployeeEntity employeeEntity = employeeMapper.selectById(id);
+        if (employeeEntity == null) {
+            throw new AccountNotFoundException("id为" + id + "的员工不存在");
+        }
+        return employeeEntity;
+    }
+
+    @Override
+    public void update(EmployeeDTO employeeDTO) {
+        // 1、参数校验交给validator
+
     }
 }

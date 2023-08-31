@@ -232,7 +232,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
         return employeeEntity;
     }
-
     /**
      * 更新员工信息
      *
@@ -270,7 +269,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeEntity.setUpdateUser(BaseContext.getCurrentId());
         employeeMapper.updateById(employeeEntity);
     }
-
     /**
      * 修改密码
      *

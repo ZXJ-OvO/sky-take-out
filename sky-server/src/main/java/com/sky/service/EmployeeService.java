@@ -56,6 +56,10 @@ public interface EmployeeService {
      * @param id     员工id
      */
     void updateStatus(Integer status, Long id);
-
+    /**
+     * 更新员工密码
+     *
+     * @param passwordEditDTO 密码修改DTO
+     */
     void updatePassword(PasswordEditDTO passwordEditDTO);
 }

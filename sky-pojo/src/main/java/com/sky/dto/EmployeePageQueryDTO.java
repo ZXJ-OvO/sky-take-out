@@ -14,7 +14,6 @@ import java.io.Serializable;
 public class EmployeePageQueryDTO implements Serializable {
 
     @ApiModelProperty(value = "姓名")
-    @Length(min = 2, max = 32, message = "姓名长度必须在2~32位之间")
     private String name;
     @ApiModelProperty(value = "页码")
     @Range(min = 1, max = 999, message = "页码必须在1~999之间")

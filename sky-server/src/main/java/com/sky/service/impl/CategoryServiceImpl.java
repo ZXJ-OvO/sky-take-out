@@ -117,7 +117,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void updateStatus(Integer status, Long id) {
+        // 1、构造更新对象
+        CategoryEntity categoryEntity = new CategoryEntity();
+        categoryEntity.setId(id);
+        categoryEntity.setStatus(status);
 
+        // 2、从本地线程中拿到id，设置更新人，更新数据库
+        categoryEntity.setUpdateUser(BaseContext.getCurrentId());
+        categoryMapper.updateById(categoryEntity);
     }
 
     @Override

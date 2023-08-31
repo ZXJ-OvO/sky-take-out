@@ -16,6 +16,9 @@ import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+/**
+ * @author zxj
+ */
 @RestController
 @RequestMapping("/admin/category")
 @Api(tags = "分类相关接口")
@@ -86,7 +89,7 @@ public class CategoryController {
      */
     @ApiOperation(value = "分类状态", notes = "分类禁用与启用操作")
     @PostMapping("/status/{status}")
-    public Result<String> updateStatus(@PathVariable @NotNull(message = "状态不能为空") Integer status, @PathVariable @NotNull(message = "id不能为空") Long id) {
+    public Result<String> updateStatus(@PathVariable @NotNull(message = "状态不能为空") Integer status, @RequestParam @NotNull(message = "id不能为空") Long id) {
         categoryService.updateStatus(status, id);
         return Result.success();
     }

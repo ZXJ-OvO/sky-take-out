@@ -6,6 +6,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.BCrypt;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sky.constant.*;
 import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -155,8 +157,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         // 3、身份证信息脱敏
-        DesensitizedUtil.idCardNum(idNumber, 6, 4);
-        employeeDTO.setIdNumber(idNumber);
+        String idCardNum = DesensitizedUtil.idCardNum(idNumber, 6, 4);
+        employeeDTO.setIdNumber(idCardNum);
 
         // 4、对象属性拷贝 DTO -> Entity
         EmployeeEntity employeeEntity = new EmployeeEntity();
@@ -187,5 +189,33 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     public PageBean pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
+
+        // 1、获取分页查询条件
+        String name = employeePageQueryDTO.getName();
+        int pageSize = employeePageQueryDTO.getPageSize();
+        int page = employeePageQueryDTO.getPage();
+
+        // 2、构建查询条件
+        QueryWrapper<EmployeeEntity> queryWrapper = new QueryWrapper<>();
+        if (name != null && !name.isEmpty()) {
+            queryWrapper.like("name", name);
+        }
+
+        // 3、分页查询
+        Page<EmployeeEntity> pageWrapper = new Page<>(page, pageSize);
+        Page<EmployeeEntity> pageData = employeeMapper.selectPage(pageWrapper, queryWrapper);
+        List<EmployeeEntity> list = pageData.getRecords();
+
+        // 4、查询总记录数
+        Long total = employeeMapper.selectCount(queryWrapper);
+
+        // 5、封装分页查询结果
+        PageBean pageBean = PageBean.builder()
+                .total(total)
+                .records(list)
+                .build();
+
+        // 6、返回分页查询结果
+        return pageBean;
     }
 }

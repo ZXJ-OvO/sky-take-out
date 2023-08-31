@@ -2,6 +2,8 @@ package com.sky.controller.admin;
 
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.result.PageBean;
 import com.sky.result.Result;
 import com.sky.service.EmployeeService;
 import com.sky.vo.EmployeeLoginVO;
@@ -9,10 +11,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -49,7 +48,7 @@ public class EmployeeController {
      */
     @ApiOperation(value = "员工登出", notes = "员工登出")
     @PostMapping("/logout")
-    public Result<String> login() {
+    public Result<String> logout() {
         return Result.success();
     }
 
@@ -64,5 +63,18 @@ public class EmployeeController {
     public Result<String> insert(@RequestBody @Validated EmployeeDTO employeeDTO) {
         employeeService.insert(employeeDTO);
         return Result.success();
+    }
+
+    /**
+     * 员工分页查询
+     *
+     * @param employeePageQueryDTO 员工信息DTO
+     * @return pageBean 员工信息分页对象
+     */
+    @ApiOperation(value = "员工分页查询", notes = "员工分页查询")
+    @GetMapping("/page")
+    public Result<PageBean> pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
+        PageBean pageBean = employeeService.pageQuery(employeePageQueryDTO);
+        return Result.success(pageBean);
     }
 }

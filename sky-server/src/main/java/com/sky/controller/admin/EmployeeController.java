@@ -115,8 +115,14 @@ public class EmployeeController {
         return Result.success();
     }
 
+    /**
+     * 修改密码
+     *
+     * @param passwordEditDTO 密码修改DTO
+     * @return null
+     */
     @ApiOperation(value = "修改密码", notes = "修改密码")
-    @PostMapping("/editPassword")
+    @PutMapping("/editPassword")
     public Result<String> updatePassword(@RequestBody PasswordEditDTO passwordEditDTO) {
         employeeService.updatePassword(passwordEditDTO);
         return Result.success();

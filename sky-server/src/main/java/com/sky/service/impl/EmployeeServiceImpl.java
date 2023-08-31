@@ -12,6 +12,7 @@ import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.dto.PasswordEditDTO;
 import com.sky.entity.EmployeeEntity;
 import com.sky.exception.*;
 import com.sky.mapper.EmployeeMapper;
@@ -268,5 +269,49 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 2、从本地线程中拿到id，设置更新人，更新数据库
         employeeEntity.setUpdateUser(BaseContext.getCurrentId());
         employeeMapper.updateById(employeeEntity);
+    }
+
+    /**
+     * 修改密码
+     *
+     * @param passwordEditDTO 密码修改DTO
+     */
+    @Override
+    @Transactional
+    public void updatePassword(PasswordEditDTO passwordEditDTO) {
+
+        // 1、从本地线程中拿到id
+        String oldPassword = passwordEditDTO.getOldPassword();
+        String newPassword = passwordEditDTO.getNewPassword();
+        Long id = BaseContext.getCurrentId();
+
+        // 1、id对应的员工是否存在
+        EmployeeEntity employeeEntity = employeeMapper.selectById(id);
+        if (employeeEntity == null) {
+            throw new AccountNotFoundException("id为" + id + "的员工不存在");
+        }
+
+        // 2、原密码是否正确
+        String dbPwd = employeeEntity.getPassword();
+        if (!BCrypt.checkpw(oldPassword, dbPwd)) {
+            throw new PasswordErrorException("原密码错误");
+        }
+
+        // 3、新密码是否与原密码相同
+        if (oldPassword.equals(newPassword)) {
+            throw new PasswordErrorException("新密码不能与原密码相同");
+        }
+
+        // 4、新密码加密
+        String salt = BCrypt.gensalt();
+        String newPwd = BCrypt.hashpw(newPassword, salt);
+
+        // 4、更新数据库
+        EmployeeEntity updateEntity = EmployeeEntity.builder()
+                .id(id)
+                .password(newPwd)
+                .updateUser(BaseContext.getCurrentId())
+                .build();
+        employeeMapper.updateById(updateEntity);
     }
 }

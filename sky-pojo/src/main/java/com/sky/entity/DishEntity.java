@@ -1,5 +1,7 @@
 package com.sky.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,11 +13,13 @@ import java.time.LocalDateTime;
 
 /**
  * 菜品
+ * @author zxj
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@TableName("dish")
 public class DishEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;

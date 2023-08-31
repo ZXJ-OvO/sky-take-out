@@ -6,7 +6,12 @@ import com.sky.context.BaseContext;
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
 import com.sky.entity.CategoryEntity;
+import com.sky.entity.DishEntity;
+import com.sky.entity.SetmealEntity;
+import com.sky.exception.IllegalDeleteException;
 import com.sky.mapper.CategoryMapper;
+import com.sky.mapper.DishMapper;
+import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageBean;
 import com.sky.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +31,12 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Resource
     private CategoryMapper categoryMapper;
+
+    @Resource
+    private DishMapper dishMapper;
+
+    @Resource
+    private SetmealMapper setmealMapper;
 
     @Override
     public void insert(CategoryDTO categoryDTO) {
@@ -78,7 +89,25 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void deleteById(Long id) {
+        // 1、id不存在
+        CategoryEntity entity = categoryMapper.selectById(id);
+        if (entity == null) {
+            throw new RuntimeException("分类不存在");
+        }
 
+        // 2、分类下有菜品或套餐 setmeal dish
+        QueryWrapper<DishEntity> dishEntityQueryWrapper = new QueryWrapper<>();
+        QueryWrapper<SetmealEntity> setmealEntityQueryWrapper = new QueryWrapper<>();
+        dishEntityQueryWrapper.eq("category_id", id);
+        setmealEntityQueryWrapper.eq("category_id", id);
+        Long dishCount = dishMapper.selectCount(dishEntityQueryWrapper);
+        Long setmealCount = setmealMapper.selectCount(setmealEntityQueryWrapper);
+        if (dishCount > 0 || setmealCount > 0) {
+            throw new IllegalDeleteException("分类下有菜品或套餐，不能删除");
+        }
+
+        // 2、执行删除
+        categoryMapper.deleteById(id);
     }
 
     @Override

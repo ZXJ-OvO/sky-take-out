@@ -62,7 +62,7 @@ public class CategoryController {
      */
     @ApiOperation(value = "根据id删除分类", notes = "根据id删除分类")
     @DeleteMapping
-    public Result<String> deleteById(@RequestParam Long id) {
+    public Result<String> deleteById(@RequestParam @NotNull(message = "id不能为空") Long id) {
         categoryService.deleteById(id);
         return Result.success();
     }

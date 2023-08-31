@@ -65,9 +65,11 @@ public class CategoryController {
         return Result.success();
     }
 
+
     /**
-     * 根据类型分页查询分类
-     * @param type 类型
+     * 分类查询
+     *
+     * @param categoryPageQueryDTO 分类分页查询条件
      * @return Result<PageBean>
      */
     @ApiOperation(value = "分类查询", notes = "根据类型分页查询分类")

@@ -1,5 +1,6 @@
 package com.sky.controller.admin;
 
+import com.sky.annotation.PreAuthorize;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
@@ -39,6 +40,7 @@ public class EmployeeController {
      */
     @ApiOperation(value = "员工登录", notes = "员工登录")
     @PostMapping("/login")
+    @PreAuthorize("admin:employee:pagePost")
     public Result<EmployeeLoginVO> login(@RequestBody EmployeeLoginDTO employeeLoginDTO, HttpServletRequest httpServletRequest) {
         EmployeeLoginVO employeeLoginVO = employeeService.login(employeeLoginDTO, httpServletRequest);
         return Result.success(employeeLoginVO);
@@ -50,6 +52,7 @@ public class EmployeeController {
      */
     @ApiOperation(value = "员工登出", notes = "员工登出")
     @PostMapping("/logout")
+    @PreAuthorize("admin:employee:logout")
     public Result<String> logout() {
         return Result.success();
     }
@@ -61,6 +64,7 @@ public class EmployeeController {
      */
     @ApiOperation(value = "新增员工", notes = "新增员工")
     @PostMapping
+    @PreAuthorize("admin:employee:insert")
     public Result<String> insert(@RequestBody @Validated EmployeeDTO employeeDTO) {
         employeeService.insert(employeeDTO);
         return Result.success();
@@ -73,6 +77,7 @@ public class EmployeeController {
      */
     @ApiOperation(value = "员工分页查询", notes = "员工分页查询")
     @GetMapping("/page")
+    @PreAuthorize("admin:employee:pageGet")
     public Result<PageBean> pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
         PageBean pageBean = employeeService.pageQuery(employeePageQueryDTO);
         return Result.success(pageBean);
@@ -85,6 +90,7 @@ public class EmployeeController {
      */
     @ApiOperation(value = "根据id查询员工", notes = "根据id查询员工")
     @GetMapping("/{id}")
+    @PreAuthorize("admin:employee:query")
     public Result<EmployeeEntity> selectById(@PathVariable Long id) {
         EmployeeEntity employee = employeeService.selectById(id);
         return Result.success(employee);
@@ -97,6 +103,7 @@ public class EmployeeController {
      */
     @ApiOperation(value = "更新员工", notes = "编辑员工信息")
     @PutMapping
+    @PreAuthorize("admin:employee:update")
     public Result<String> update(@RequestBody @Validated EmployeeDTO employeeDTO) {
         employeeService.update(employeeDTO);
         return Result.success();
@@ -110,6 +117,7 @@ public class EmployeeController {
      */
     @ApiOperation(value = "账号状态", notes = "员工账号禁用与启用操作")
     @PostMapping("/status/{status}")
+    @PreAuthorize("admin:employee:status")
     public Result<String> updateStatus(@PathVariable @NotNull(message = "状态不能为空") Integer status, @RequestParam @NotNull(message = "id不能为空") Long id) {
         employeeService.updateStatus(status, id);
         return Result.success();
@@ -122,6 +130,7 @@ public class EmployeeController {
      */
     @ApiOperation(value = "修改密码", notes = "修改密码")
     @PutMapping("/editPassword")
+    @PreAuthorize("admin:employee:editPassword")
     public Result<String> updatePassword(@RequestBody PasswordEditDTO passwordEditDTO) {
         employeeService.updatePassword(passwordEditDTO);
         return Result.success();

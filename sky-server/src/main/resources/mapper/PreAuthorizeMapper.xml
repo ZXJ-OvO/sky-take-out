@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sky.mapper.PreAuthorizeMapper">
+
+
+    <select id="selectPerms" resultType="java.lang.Long">
+        select count(su.id)
+        from employee su,
+             sys_employee_role sur,
+             sys_role sr,
+             sys_role_menu srm,
+             sys_menu sm
+        where su.id = sur.user_id
+          and sr.role_id = sur.role_id
+          and su.id = #{currentId}
+          and sm.perms = #{value}
+          and sr.role_id = srm.role_id
+          and srm.menu_id = sm.menu_id
+    </select>
+</mapper>

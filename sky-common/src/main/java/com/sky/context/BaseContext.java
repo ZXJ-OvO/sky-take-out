@@ -2,6 +2,7 @@ package com.sky.context;
 
 /**
  * 维护线程变量ThreadLocal的工具类
+ * @author zxj
  */
 public class BaseContext {
 

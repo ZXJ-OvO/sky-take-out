@@ -1,6 +1,7 @@
 package com.sky.interceptor;
 
 import com.sky.constant.JwtClaimsConstant;
+import com.sky.context.BaseContext;
 import com.sky.properties.JwtProperties;
 import com.sky.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -46,13 +47,32 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
             Claims claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), token);
             Long empId = Long.valueOf(claims.get(JwtClaimsConstant.EMP_ID).toString());
             log.info("当前员工id：{}", empId);
+            BaseContext.setCurrentId(empId);
             // 3、通过，放行
             return true;
         } catch (Exception ex) {
             ex.printStackTrace();
-            //4、不通过，响应401状态码
+            //4、不通过，响应401
             response.setStatus(401);
             return false;
         }
+    }
+
+    /**
+     * 该方法会在Controller方法执行之后，返回结果之前执行
+     *
+     * @param request  请求对象
+     * @param response 响应对象
+     * @param handler  当前拦截到的方法对象
+     * @param ex       异常对象
+     * @throws Exception 异常
+     */
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        // 本地线程就像一个Map集合，key是当前线程，value是任意类型的数据
+        // 如果方法执行完毕还不清除数据，那么数据会一直存在，占用内存，最终会导致内存溢出
+
+        // 移除当前线程的数据
+        BaseContext.removeCurrentId();
     }
 }

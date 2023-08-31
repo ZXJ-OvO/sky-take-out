@@ -1,17 +1,21 @@
 package com.sky.service.impl;
 
+import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.IdcardUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.BCrypt;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.sky.constant.*;
+import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.EmployeeEntity;
 import com.sky.exception.*;
 import com.sky.mapper.EmployeeMapper;
 import com.sky.properties.JwtProperties;
+import com.sky.result.PageBean;
 import com.sky.service.EmployeeService;
 import com.sky.utils.IpUtil;
 import com.sky.utils.JwtUtil;
@@ -59,12 +63,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
 
         // 1、只要redis中有该ip的key，并且value的值为3，就说明该ip已经被锁定了，直接抛出异常，不用继续往后走
-        String clientIP = IpUtil.getIpAddress(httpServletRequest);
+        String ip = IpUtil.getIpAddress(httpServletRequest);
         String identifier;
-        if (clientIP.contains(":")) {
-            identifier = "IPv6-" + clientIP;
+        if (ip.contains(":")) {
+            identifier = "IPv6-" + ip;
         } else {
-            identifier = "IPv4-" + clientIP;
+            identifier = "IPv4-" + ip;
         }
         String wrongTime = ops.get(identifier);
         if (wrongTime != null && Integer.parseInt(wrongTime) >= 3) {
@@ -75,10 +79,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         QueryWrapper<EmployeeEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", employeeLoginDTO.getUsername());
         EmployeeEntity employeeEntity = employeeMapper.selectOne(queryWrapper);
-        if (employeeEntity == null)
+        if (employeeEntity == null) {
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
-        if (employeeEntity.getStatus().equals(StatusConstant.DISABLE))
+        }
+        if (employeeEntity.getStatus().equals(StatusConstant.DISABLE)) {
             throw new AccountDisabledException(MessageConstant.ACCOUNT_DISABLED);
+        }
 
         // 3、校验密码
         String dtoPwd = employeeLoginDTO.getPassword();
@@ -107,7 +113,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         String token = JwtUtil.createJWT(jwtProperties.getAdminSecretKey(), jwtProperties.getAdminTtl(), claims);
 
         // 7、校验通过，给VO封装数据
-        EmployeeLoginVO employeeLoginVO = new EmployeeLoginVO().builder()
+        EmployeeLoginVO employeeLoginVO = EmployeeLoginVO.builder()
                 .id(employeeEntity.getId())
                 .userName(employeeEntity.getUsername())
                 .name(employeeEntity.getName())
@@ -134,25 +140,52 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Transactional
     public void insert(EmployeeDTO employeeDTO) {
 
-        // 1、Hutool身份校验工具类校验身份证，其他字段交给validator校验
+        // 1、校验用户名的唯一性，字段校验交给validator
+        QueryWrapper<EmployeeEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", employeeDTO.getUsername());
+        EmployeeEntity dbEntity = employeeMapper.selectOne(queryWrapper);
+        if (dbEntity != null) {
+            throw new DuplicateFieldException(MessageConstant.DUPLICATE_USERNAME);
+        }
+
+        // 2、Hutool身份校验工具类校验身份证
         String idNumber = employeeDTO.getIdNumber();
         if (!IdcardUtil.isValidCard(idNumber)) {
             throw new InvalidFieldException("本系统仅支持中国大陆18位、15位和港澳台10位身份证号");
         }
 
-        // 2、对象属性拷贝 DTO -> Entity
+        // 3、身份证信息脱敏
+        DesensitizedUtil.idCardNum(idNumber, 6, 4);
+        employeeDTO.setIdNumber(idNumber);
+
+        // 4、对象属性拷贝 DTO -> Entity
         EmployeeEntity employeeEntity = new EmployeeEntity();
         BeanUtils.copyProperties(employeeDTO, employeeEntity);
 
-        // 3、密码加密，Hutool封装了BCrypt，不需要再引入相关依赖
+        // 5、通过本地线程工具类获取当前登录用户的id
+        Long currentId = BaseContext.getCurrentId();
+        employeeEntity.setCreateUser(currentId);
+        employeeEntity.setUpdateUser(currentId);
+
+        // 6、密码加密
         String salt = BCrypt.gensalt();
         String password = BCrypt.hashpw(PasswordConstant.DEFAULT_PASSWORD, salt);
 
-        // 4、设置默认值，createUser、updateUser、createTime、updateTime交给MyMetaObjectHandler处理
+        // 7、设置默认值，createUser、updateUser、createTime、updateTime交给MyMetaObjectHandler处理
         employeeEntity.setPassword(password);
         employeeEntity.setStatus(1);
 
-        // 5、插入数据库
+        // 8、插入数据库
         employeeMapper.insert(employeeEntity);
+    }
+
+    /**
+     * 员工分页查询
+     *
+     * @param employeePageQueryDTO 员工分页查询DTO
+     * @return 员工分页数据
+     */
+    @Override
+    public PageBean pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
     }
 }

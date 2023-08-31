@@ -31,4 +31,5 @@ public class MessageConstant {
     public static final String ORDER_NOT_FOUND = "订单不存在";
 
     public static final String ACCOUNT_DISABLED = "账号被禁用";
+    public static final String DUPLICATE_USERNAME = "用户名重复";
 }

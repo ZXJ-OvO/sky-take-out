@@ -2,7 +2,6 @@ package com.sky.controller.admin;
 
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
-import com.sky.entity.CategoryEntity;
 import com.sky.result.PageBean;
 import com.sky.result.Result;
 import com.sky.service.CategoryService;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * @author zxj
@@ -68,16 +66,15 @@ public class CategoryController {
     }
 
     /**
-     * 分类查询
-     *
+     * 根据类型分页查询分类
      * @param type 类型
-     * @return Result<List < CategoryEntity>>
+     * @return Result<PageBean>
      */
-    @ApiOperation(value = "分类查询", notes = "根据类型查询分类")
+    @ApiOperation(value = "分类查询", notes = "根据类型分页查询分类")
     @GetMapping("/list")
-    public Result<List<CategoryEntity>> selectByType(Integer type) {
-        List<CategoryEntity> categoryEntities = categoryService.selectByType(type);
-        return Result.success(categoryEntities);
+    public Result<PageBean> selectByType(CategoryPageQueryDTO categoryPageQueryDTO) {
+        PageBean pageBean = categoryService.selectByType(categoryPageQueryDTO);
+        return Result.success(pageBean);
     }
 
     /**

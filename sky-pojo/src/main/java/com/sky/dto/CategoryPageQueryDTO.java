@@ -2,10 +2,8 @@ package com.sky.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
-import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 
 /**

@@ -111,8 +111,22 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryEntity> selectByType(Integer type) {
-        return null;
+    public PageBean selectByType(CategoryPageQueryDTO categoryPageQueryDTO) {
+        int page = categoryPageQueryDTO.getPage();
+        int pageSize = categoryPageQueryDTO.getPageSize();
+        Integer type = categoryPageQueryDTO.getType();
+        QueryWrapper<CategoryEntity> queryWrapper = new QueryWrapper<>();
+        Page<CategoryEntity> pageWrapper = new Page<>(page, pageSize);
+        if (type != null) {
+            queryWrapper.eq("type", type);
+        }
+        Page<CategoryEntity> entityPage = categoryMapper.selectPage(pageWrapper, queryWrapper);
+        List<CategoryEntity> records = entityPage.getRecords();
+        Long total = categoryMapper.selectCount(queryWrapper);
+        return PageBean.builder()
+                .total(total)
+                .records(records)
+                .build();
     }
 
     @Override

@@ -42,14 +42,12 @@ public interface EmployeeService {
      * @return 员工信息
      */
     EmployeeEntity selectById(Long id);
-
     /**
      * 更新员工信息
      *
      * @param employeeDTO 员工信息DTO
      */
     void update(EmployeeDTO employeeDTO);
-
     /**
      * 更新员工状态
      *

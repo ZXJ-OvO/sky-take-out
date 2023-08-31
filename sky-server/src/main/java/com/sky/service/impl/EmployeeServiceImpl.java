@@ -240,6 +240,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void update(EmployeeDTO employeeDTO) {
         // 1、参数校验交给validator
 
+
     }
 
     /**
@@ -249,6 +250,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @param id     员工id
      */
     @Override
+    @Transactional
     public void updateStatus(Integer status, Long id) {
         // 1、因为validator只用来校验DTO，而这里直接交给entity，所以这里必须手动校验，校验在controller层完成
         EmployeeEntity employeeEntity = new EmployeeEntity();
@@ -256,6 +258,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeEntity.setStatus(status);
         UpdateWrapper<EmployeeEntity> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("id", id);
+        employeeEntity.setUpdateUser(BaseContext.getCurrentId());
         employeeMapper.update(employeeEntity, updateWrapper);
     }
 }

@@ -9,6 +9,7 @@ import com.sky.entity.CategoryEntity;
 import com.sky.entity.DishEntity;
 import com.sky.entity.SetmealEntity;
 import com.sky.exception.IllegalDeleteException;
+import com.sky.exception.InvalidFieldException;
 import com.sky.mapper.CategoryMapper;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealMapper;
@@ -17,6 +18,7 @@ import com.sky.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -38,7 +40,13 @@ public class CategoryServiceImpl implements CategoryService {
     @Resource
     private SetmealMapper setmealMapper;
 
+    /**
+     * 新增分类
+     *
+     * @param categoryDTO 分类信息
+     */
     @Override
+    @Transactional
     public void insert(CategoryDTO categoryDTO) {
         // 1、拷贝属性
         CategoryEntity categoryEntity = new CategoryEntity();
@@ -53,6 +61,12 @@ public class CategoryServiceImpl implements CategoryService {
         categoryMapper.insert(categoryEntity);
     }
 
+    /**
+     * 分类分页查询
+     *
+     * @param categoryPageQueryDTO 分类分页查询条件
+     * @return PageBean
+     */
     @Override
     public PageBean pageQuery(CategoryPageQueryDTO categoryPageQueryDTO) {
         // 1、解析参数
@@ -87,7 +101,13 @@ public class CategoryServiceImpl implements CategoryService {
                 .build();
     }
 
+    /**
+     * 根据id删除分类
+     *
+     * @param id 分类id 1、id不存在 2、分类下有菜品或套餐
+     */
     @Override
+    @Transactional
     public void deleteById(Long id) {
         // 1、id不存在
         CategoryEntity entity = categoryMapper.selectById(id);
@@ -110,6 +130,12 @@ public class CategoryServiceImpl implements CategoryService {
         categoryMapper.deleteById(id);
     }
 
+    /**
+     * 根据id查询分类
+     *
+     * @param categoryPageQueryDTO 分类类型
+     * @return PageBean
+     */
     @Override
     public PageBean selectByType(CategoryPageQueryDTO categoryPageQueryDTO) {
         int page = categoryPageQueryDTO.getPage();
@@ -129,7 +155,14 @@ public class CategoryServiceImpl implements CategoryService {
                 .build();
     }
 
+    /**
+     * 更新分类状态
+     *
+     * @param status 状态 1 启用 2 禁用
+     * @param id     分类id
+     */
     @Override
+    @Transactional
     public void updateStatus(Integer status, Long id) {
         // 1、构造更新对象
         CategoryEntity categoryEntity = new CategoryEntity();
@@ -141,8 +174,30 @@ public class CategoryServiceImpl implements CategoryService {
         categoryMapper.updateById(categoryEntity);
     }
 
+    /**
+     * 更新分类
+     *
+     * @param categoryDTO 分类信息 1、分类名称不能为空 2、排序不能为空
+     */
     @Override
+    @Transactional
     public void update(CategoryDTO categoryDTO) {
+        // 1、为了兼顾分页查询，因此没有在DTO中对字段进行校验，这里需要校验
+        String name = categoryDTO.getName();
+        Integer sort = categoryDTO.getSort();
+        if (name == null || name.isEmpty()) {
+            throw new InvalidFieldException("分类名称不能为空");
+        }
+        if (sort == null) {
+            throw new InvalidFieldException("排序不能为空");
+        }
 
+        // 2、构造更新对象
+        CategoryEntity categoryEntity = new CategoryEntity();
+        BeanUtils.copyProperties(categoryDTO, categoryEntity);
+
+        // 3、从本地线程中拿到id，设置更新人，更新数据库
+        categoryEntity.setUpdateUser(BaseContext.getCurrentId());
+        categoryMapper.updateById(categoryEntity);
     }
 }

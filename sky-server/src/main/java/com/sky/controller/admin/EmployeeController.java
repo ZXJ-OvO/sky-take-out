@@ -3,6 +3,7 @@ package com.sky.controller.admin;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.dto.PasswordEditDTO;
 import com.sky.entity.EmployeeEntity;
 import com.sky.result.PageBean;
 import com.sky.result.Result;
@@ -42,7 +43,6 @@ public class EmployeeController {
         EmployeeLoginVO employeeLoginVO = employeeService.login(employeeLoginDTO, httpServletRequest);
         return Result.success(employeeLoginVO);
     }
-
     /**
      * 员工登出
      *
@@ -53,7 +53,6 @@ public class EmployeeController {
     public Result<String> logout() {
         return Result.success();
     }
-
     /**
      * 新增员工
      *
@@ -66,7 +65,6 @@ public class EmployeeController {
         employeeService.insert(employeeDTO);
         return Result.success();
     }
-
     /**
      * 员工分页查询
      *
@@ -79,7 +77,6 @@ public class EmployeeController {
         PageBean pageBean = employeeService.pageQuery(employeePageQueryDTO);
         return Result.success(pageBean);
     }
-
     /**
      * 根据id查询员工
      *
@@ -92,7 +89,6 @@ public class EmployeeController {
         EmployeeEntity employee = employeeService.selectById(id);
         return Result.success(employee);
     }
-
     /**
      * 更新员工
      *
@@ -101,11 +97,10 @@ public class EmployeeController {
      */
     @ApiOperation(value = "更新员工", notes = "编辑员工信息")
     @PutMapping
-    public Result<EmployeeEntity> update(@RequestBody @Validated EmployeeDTO employeeDTO) {
+    public Result<String> update(@RequestBody @Validated EmployeeDTO employeeDTO) {
         employeeService.update(employeeDTO);
         return Result.success();
     }
-
     /**
      * 账号状态
      *
@@ -117,6 +112,13 @@ public class EmployeeController {
     @PostMapping("/status/{status}")
     public Result<String> updateStatus(@PathVariable @NotNull(message = "状态不能为空") Integer status, @RequestParam @NotNull(message = "id不能为空") Long id) {
         employeeService.updateStatus(status, id);
+        return Result.success();
+    }
+
+    @ApiOperation(value = "修改密码", notes = "修改密码")
+    @PostMapping("/editPassword")
+    public Result<String> updatePassword(@RequestBody PasswordEditDTO passwordEditDTO) {
+        employeeService.updatePassword(passwordEditDTO);
         return Result.success();
     }
 }

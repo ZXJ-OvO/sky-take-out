@@ -4,6 +4,7 @@ package com.sky.service;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.dto.PasswordEditDTO;
 import com.sky.entity.EmployeeEntity;
 import com.sky.result.PageBean;
 import com.sky.vo.EmployeeLoginVO;
@@ -55,4 +56,6 @@ public interface EmployeeService {
      * @param id     员工id
      */
     void updateStatus(Integer status, Long id);
+
+    void updatePassword(PasswordEditDTO passwordEditDTO);
 }

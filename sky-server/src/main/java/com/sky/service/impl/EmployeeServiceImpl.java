@@ -6,7 +6,6 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.BCrypt;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sky.constant.*;
 import com.sky.context.BaseContext;
@@ -133,7 +132,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 9、返回员工信息VO
         return employeeLoginVO;
     }
-
     /**
      * 新增员工
      *
@@ -181,7 +179,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 8、插入数据库
         employeeMapper.insert(employeeEntity);
     }
-
     /**
      * 员工分页查询
      *
@@ -217,7 +214,6 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .records(list)
                 .build();
     }
-
     /**
      * 根据id查询员工信息
      *
@@ -236,13 +232,25 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeEntity;
     }
 
+    /**
+     * 更新员工信息
+     *
+     * @param employeeDTO 员工信息DTO
+     */
     @Override
+    @Transactional
     public void update(EmployeeDTO employeeDTO) {
-        // 1、参数校验交给validator
+        // 1. 参数校验交给validator
+        EmployeeEntity employeeEntity = EmployeeEntity.builder()
+                .updateUser(BaseContext.getCurrentId())
+                .build();
 
+        // 2. 对象属性拷贝 DTO -> Entity
+        BeanUtils.copyProperties(employeeDTO, employeeEntity);
 
+        // 3. 更新数据库
+        employeeMapper.updateById(employeeEntity);
     }
-
     /**
      * 更新员工状态
      *
@@ -256,9 +264,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         EmployeeEntity employeeEntity = new EmployeeEntity();
         employeeEntity.setId(id);
         employeeEntity.setStatus(status);
-        UpdateWrapper<EmployeeEntity> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("id", id);
+
+        // 2、从本地线程中拿到id，设置更新人，更新数据库
         employeeEntity.setUpdateUser(BaseContext.getCurrentId());
-        employeeMapper.update(employeeEntity, updateWrapper);
+        employeeMapper.updateById(employeeEntity);
     }
 }

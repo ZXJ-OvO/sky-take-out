@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -25,6 +24,9 @@ public class EmployeeEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * 主键 not null unique
+     */
     @TableId(type = IdType.AUTO)
     @ApiModelProperty(value = "主键")
     private Long id;
@@ -66,29 +68,23 @@ public class EmployeeEntity implements Serializable {
     /**
      * 创建时间 null
      */
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT, value = "create_time")
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;
     /**
      * 更新时间 null
      */
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT_UPDATE, value = "update_time")
     @ApiModelProperty(value = "更新时间")
     private LocalDateTime updateTime;
     /**
      * 创建人 null
-     * 设定：1001为系统管理员，为系统运营使用，其他员工由此创建
-     * 1000为超级管理员，为开发测试使用，admin账号由此创建
      */
-    @TableField(fill = FieldFill.INSERT, value = "create_user")
     @ApiModelProperty(value = "创建人")
     private Long createUser;
     /**
      * 修改人 null
      */
-    @TableField(fill = FieldFill.INSERT_UPDATE, value = "update_user")
     @ApiModelProperty(value = "修改人")
     private Long updateUser;
 }

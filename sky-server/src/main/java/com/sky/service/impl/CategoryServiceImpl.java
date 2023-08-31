@@ -2,6 +2,7 @@ package com.sky.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sky.context.BaseContext;
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
 import com.sky.entity.CategoryEntity;
@@ -9,6 +10,7 @@ import com.sky.mapper.CategoryMapper;
 import com.sky.result.PageBean;
 import com.sky.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -27,7 +29,17 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void insert(CategoryDTO categoryDTO) {
+        // 1、拷贝属性
+        CategoryEntity categoryEntity = new CategoryEntity();
+        BeanUtils.copyProperties(categoryDTO, categoryEntity);
 
+        // 2、补全属性
+        categoryEntity.setCreateUser(BaseContext.getCurrentId());
+        categoryEntity.setUpdateUser(BaseContext.getCurrentId());
+        categoryEntity.setStatus(1);
+
+        // 3、执行插入
+        categoryMapper.insert(categoryEntity);
     }
 
     @Override

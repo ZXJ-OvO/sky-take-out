@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author zxj
@@ -92,10 +93,30 @@ public class EmployeeController {
         return Result.success(employee);
     }
 
+    /**
+     * 更新员工
+     *
+     * @param employeeDTO 员工信息DTO
+     * @return null
+     */
     @ApiOperation(value = "更新员工", notes = "编辑员工信息")
     @PutMapping
     public Result<EmployeeEntity> update(@RequestBody @Validated EmployeeDTO employeeDTO) {
         employeeService.update(employeeDTO);
+        return Result.success();
+    }
+
+    /**
+     * 账号状态
+     *
+     * @param status 0：禁用 1：启用
+     * @param id     员工id
+     * @return null
+     */
+    @ApiOperation(value = "账号状态", notes = "员工账号禁用与启用操作")
+    @PostMapping("/status/{status}")
+    public Result<String> updateStatus(@PathVariable @NotNull(message = "状态不能为空") Integer status, @RequestParam @NotNull(message = "id不能为空") Long id) {
+        employeeService.updateStatus(status, id);
         return Result.success();
     }
 }

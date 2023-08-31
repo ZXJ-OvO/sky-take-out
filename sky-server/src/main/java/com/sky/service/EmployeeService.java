@@ -43,5 +43,18 @@ public interface EmployeeService {
      */
     EmployeeEntity selectById(Long id);
 
+    /**
+     * 更新员工信息
+     *
+     * @param employeeDTO 员工信息DTO
+     */
     void update(EmployeeDTO employeeDTO);
+
+    /**
+     * 更新员工状态
+     *
+     * @param status 状态
+     * @param id     员工id
+     */
+    void updateStatus(Integer status, Long id);
 }

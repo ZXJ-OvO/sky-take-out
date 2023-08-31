@@ -6,6 +6,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.BCrypt;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sky.constant.*;
 import com.sky.context.BaseContext;
@@ -239,5 +240,22 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void update(EmployeeDTO employeeDTO) {
         // 1、参数校验交给validator
 
+    }
+
+    /**
+     * 更新员工状态
+     *
+     * @param status 0：禁用 1：启用
+     * @param id     员工id
+     */
+    @Override
+    public void updateStatus(Integer status, Long id) {
+        // 1、因为validator只用来校验DTO，而这里直接交给entity，所以这里必须手动校验，校验在controller层完成
+        EmployeeEntity employeeEntity = new EmployeeEntity();
+        employeeEntity.setId(id);
+        employeeEntity.setStatus(status);
+        UpdateWrapper<EmployeeEntity> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", id);
+        employeeMapper.update(employeeEntity, updateWrapper);
     }
 }

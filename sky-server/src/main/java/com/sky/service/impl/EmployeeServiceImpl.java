@@ -3,23 +3,17 @@ package com.sky.service.impl;
 import cn.hutool.core.util.IdcardUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.BCrypt;
-import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.sky.constant.JwtClaimsConstant;
-import com.sky.constant.MessageConstant;
-import com.sky.constant.PasswordConstant;
-import com.sky.constant.RedisConstant;
+import com.sky.constant.*;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.entity.EmployeeEntity;
-import com.sky.exception.AccountNotFoundException;
-import com.sky.exception.InvalidFieldException;
-import com.sky.exception.LoginFailedException;
-import com.sky.exception.PasswordErrorException;
+import com.sky.exception.*;
 import com.sky.mapper.EmployeeMapper;
 import com.sky.properties.JwtProperties;
 import com.sky.service.EmployeeService;
+import com.sky.utils.IpUtil;
 import com.sky.utils.JwtUtil;
 import com.sky.vo.EmployeeLoginVO;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +27,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -63,12 +58,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     public EmployeeLoginVO login(EmployeeLoginDTO employeeLoginDTO, HttpServletRequest httpServletRequest) {
         ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
 
-        // TODO: 2023/8/27 期望：用户密码输入3次，锁定账号一个小时  实际：由于ipv4、6的缘故，无法合并统计，因此试错次数是2的倍数
-        // 思路：同ip下失败3次直接禁止该ip的登录操作1小时，即锁定账号的操作和IP绑定而不是和账号绑定，防止恶意试错误封他人账号
-        // 如果客户端采用了代理ip，直接放行，因为代理服务商提供的ip数量有限，并且下方的工具类中已经尽可能的考虑了代理ip的问题
-
         // 1、只要redis中有该ip的key，并且value的值为3，就说明该ip已经被锁定了，直接抛出异常，不用继续往后走
-        String clientIP = ServletUtil.getClientIP(httpServletRequest);
+        String clientIP = IpUtil.getIpAddress(httpServletRequest);
         String identifier;
         if (clientIP.contains(":")) {
             identifier = "IPv6-" + clientIP;
@@ -80,39 +71,30 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new LoginFailedException(MessageConstant.ACCOUNT_LOCKED);
         }
 
-        // 2、ip不存在或者ip的value值不为3，校验参数
-        String username = employeeLoginDTO.getUsername();
-        String password = employeeLoginDTO.getPassword();
-        if (username == null || username.isEmpty()) {
-            throw new LoginFailedException(MessageConstant.NULL_USERNAME_ERROR);
-        }
-        if (password == null || password.isEmpty()) {
-            throw new LoginFailedException(MessageConstant.NULL_PASSWORD_ERROR);
-        }
-
-        // 3、校验账号
+        // 2、校验账号
         QueryWrapper<EmployeeEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username", username);
+        queryWrapper.eq("username", employeeLoginDTO.getUsername());
         EmployeeEntity employeeEntity = employeeMapper.selectOne(queryWrapper);
-        if (employeeEntity == null) {
+        if (employeeEntity == null)
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
-        }
+        if (employeeEntity.getStatus().equals(StatusConstant.DISABLE))
+            throw new AccountDisabledException(MessageConstant.ACCOUNT_DISABLED);
 
-        // 4、校验密码
+        // 3、校验密码
         String dtoPwd = employeeLoginDTO.getPassword();
-        // 表中password的原字段是varchar，长度为64，已修改为128
         String dbPwd = employeeEntity.getPassword();
+
         if (!BCrypt.checkpw(dtoPwd, dbPwd)) {
-            // 5、密码错误，redis中的value值+2，如果value值大于3，就设置该ip的key的过期时间为30分钟
+            // 4、密码错误，redis中的value值+1，如果value值大于3，就设置该ip的key的过期时间为30分钟
             if (wrongTime == null) {
-                ops.set(identifier, "1");
-                stringRedisTemplate.expire(identifier, 30, TimeUnit.MINUTES);
-            } else if (Integer.parseInt(wrongTime) <= 2) {
-                ops.increment(identifier);
-                ops.increment(identifier);
-                stringRedisTemplate.expire(identifier, 30, TimeUnit.MINUTES);
+                ops.set(identifier, "1", 1, TimeUnit.MINUTES);
             } else {
-                stringRedisTemplate.expire(identifier, 30, TimeUnit.MINUTES);
+                // 5、通过设置偏移量而不是从新设置时间，保证了时间的连续性
+                ops.set(identifier, String.valueOf(Integer.parseInt(wrongTime) + 1), 0);
+                if (Integer.parseInt(Objects.requireNonNull(ops.get(identifier))) > 2) {
+                    // 此时应该从redis拿到新的value值，而不是直接使用wrongTime
+                    ops.set(identifier, "1", 30, TimeUnit.MINUTES);
+                }
             }
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
         }
@@ -127,7 +109,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 7、校验通过，给VO封装数据
         EmployeeLoginVO employeeLoginVO = new EmployeeLoginVO().builder()
                 .id(employeeEntity.getId())
-                .userName(username)
+                .userName(employeeEntity.getUsername())
                 .name(employeeEntity.getName())
                 .token(token)
                 .build();

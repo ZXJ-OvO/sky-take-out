@@ -2,7 +2,6 @@ package com.sky.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.sky.context.BaseContext;
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
 import com.sky.entity.CategoryEntity;
@@ -53,8 +52,6 @@ public class CategoryServiceImpl implements CategoryService {
         BeanUtils.copyProperties(categoryDTO, categoryEntity);
 
         // 2、补全属性
-        categoryEntity.setCreateUser(BaseContext.getCurrentId());
-        categoryEntity.setUpdateUser(BaseContext.getCurrentId());
         categoryEntity.setStatus(1);
 
         // 3、执行插入
@@ -169,8 +166,7 @@ public class CategoryServiceImpl implements CategoryService {
         categoryEntity.setId(id);
         categoryEntity.setStatus(status);
 
-        // 2、从本地线程中拿到id，设置更新人，更新数据库
-        categoryEntity.setUpdateUser(BaseContext.getCurrentId());
+        // 2、从本地线程中拿到id，设置更新人，更新数据库，交给MetaObjectHandler处理
         categoryMapper.updateById(categoryEntity);
     }
 
@@ -196,8 +192,7 @@ public class CategoryServiceImpl implements CategoryService {
         CategoryEntity categoryEntity = new CategoryEntity();
         BeanUtils.copyProperties(categoryDTO, categoryEntity);
 
-        // 3、从本地线程中拿到id，设置更新人，更新数据库
-        categoryEntity.setUpdateUser(BaseContext.getCurrentId());
+        // 3、从本地线程中拿到id，设置更新人，更新数据库，交给MetaObjectHandler处理
         categoryMapper.updateById(categoryEntity);
     }
 }

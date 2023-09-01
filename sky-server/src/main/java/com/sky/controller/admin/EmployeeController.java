@@ -40,7 +40,7 @@ public class EmployeeController {
      */
     @ApiOperation(value = "员工登录", notes = "员工登录")
     @PostMapping("/login")
-    @PreAuthorize("admin:employee:pagePost")
+    //@PreAuthorize("admin:employee:pagePost")
     public Result<EmployeeLoginVO> login(@RequestBody EmployeeLoginDTO employeeLoginDTO, HttpServletRequest httpServletRequest) {
         EmployeeLoginVO employeeLoginVO = employeeService.login(employeeLoginDTO, httpServletRequest);
         return Result.success(employeeLoginVO);

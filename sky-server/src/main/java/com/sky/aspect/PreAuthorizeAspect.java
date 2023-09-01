@@ -29,6 +29,8 @@ public class PreAuthorizeAspect {
 
         Long currentId = BaseContext.getCurrentId();
         // 放行超级管理员
+        // 对于登录逻辑，不需要权限
+
         if (currentId == 1) {
             return joinPoint.proceed();
         }

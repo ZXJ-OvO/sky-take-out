@@ -81,10 +81,12 @@ public class EmployeeEntity implements Serializable {
      * 创建人 null
      */
     @ApiModelProperty(value = "创建人")
+    @TableField(fill = FieldFill.INSERT, value = "create_user")
     private Long createUser;
     /**
      * 修改人 null
      */
     @ApiModelProperty(value = "修改人")
+    @TableField(fill = FieldFill.INSERT_UPDATE, value = "update_user")
     private Long updateUser;
 }

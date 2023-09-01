@@ -133,6 +133,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 9、返回员工信息VO
         return employeeLoginVO;
     }
+
     /**
      * 新增员工
      *
@@ -164,10 +165,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         EmployeeEntity employeeEntity = new EmployeeEntity();
         BeanUtils.copyProperties(employeeDTO, employeeEntity);
 
-        // 5、通过本地线程工具类获取当前登录用户的id
-        Long currentId = BaseContext.getCurrentId();
-        employeeEntity.setCreateUser(currentId);
-        employeeEntity.setUpdateUser(currentId);
+        // 5、通过本地线程工具类获取当前登录用户的id，交给MyMetaObjectHandler处理
 
         // 6、密码加密
         String salt = BCrypt.gensalt();
@@ -180,6 +178,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 8、插入数据库
         employeeMapper.insert(employeeEntity);
     }
+
     /**
      * 员工分页查询
      *
@@ -215,6 +214,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .records(list)
                 .build();
     }
+
     /**
      * 根据id查询员工信息
      *
@@ -232,6 +232,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
         return employeeEntity;
     }
+
     /**
      * 更新员工信息
      *
@@ -241,9 +242,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Transactional
     public void update(EmployeeDTO employeeDTO) {
         // 1. 参数校验交给validator
-        EmployeeEntity employeeEntity = EmployeeEntity.builder()
-                .updateUser(BaseContext.getCurrentId())
-                .build();
+        EmployeeEntity employeeEntity = EmployeeEntity.builder().build();
 
         // 2. 对象属性拷贝 DTO -> Entity
         BeanUtils.copyProperties(employeeDTO, employeeEntity);
@@ -251,6 +250,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 3. 更新数据库
         employeeMapper.updateById(employeeEntity);
     }
+
     /**
      * 更新员工状态
      *
@@ -265,10 +265,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeEntity.setId(id);
         employeeEntity.setStatus(status);
 
-        // 2、从本地线程中拿到id，设置更新人，更新数据库
-        employeeEntity.setUpdateUser(BaseContext.getCurrentId());
+        // 2、从本地线程中拿到id，设置更新人，更新数据库 交给MyMetaObjectHandler处理
         employeeMapper.updateById(employeeEntity);
     }
+
     /**
      * 修改密码
      *
@@ -308,8 +308,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         EmployeeEntity updateEntity = EmployeeEntity.builder()
                 .id(id)
                 .password(newPwd)
-                .updateUser(BaseContext.getCurrentId())
                 .build();
+
         employeeMapper.updateById(updateEntity);
     }
 }

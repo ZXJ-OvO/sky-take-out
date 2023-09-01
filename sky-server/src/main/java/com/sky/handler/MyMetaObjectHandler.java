@@ -1,7 +1,8 @@
-package com.sky.config;
+package com.sky.handler;
 
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import com.sky.context.BaseContext;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
 public class MyMetaObjectHandler implements MetaObjectHandler {
 
     /**
-     * 使用mp实现添加操作,这个方法会执行,metaObject元数据(表中的名字,表中的字段)
+     * metaObject元数据(表中的名字,表中的字段)
      *
      * @param metaObject 元对象
      */
@@ -26,6 +27,8 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
     public void insertFill(MetaObject metaObject) {
         this.setFieldValByName("createTime", LocalDateTime.now(), metaObject);
         this.setFieldValByName("updateTime", LocalDateTime.now(), metaObject);
+        this.setFieldValByName("createUser", BaseContext.getCurrentId(), metaObject);
+        this.setFieldValByName("updateUser", BaseContext.getCurrentId(), metaObject);
     }
 
     /**
@@ -36,5 +39,6 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
     @Override
     public void updateFill(MetaObject metaObject) {
         this.setFieldValByName("updateTime", LocalDateTime.now(), metaObject);
+        this.setFieldValByName("updateUser", BaseContext.getCurrentId(), metaObject);
     }
 }

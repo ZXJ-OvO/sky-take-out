@@ -98,9 +98,9 @@ public class DishController {
      */
     @ApiOperation(value = "新增菜品", notes = "新增菜品")
     @PostMapping
-    @PreAuthorize("admin:dish:insert")
+    @PreAuthorize("admin:dish:insertWithFlavor")
     public Result<String> insert(@RequestBody @Validated DishDTO dishDTO) {
-        dishService.insert(dishDTO);
+        dishService.insertWithFlavor(dishDTO);
         return Result.success();
     }
 

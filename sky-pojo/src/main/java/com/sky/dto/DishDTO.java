@@ -8,7 +8,6 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -43,7 +42,6 @@ public class DishDTO implements Serializable {
     private String description;
 
     @ApiModelProperty(value = "0 停售 1 起售")
-    @Pattern(regexp = "^([01])$", message = "状态值仅支持'0'或'1'")
     private Integer status;
 
     @ApiModelProperty(value = "口味")

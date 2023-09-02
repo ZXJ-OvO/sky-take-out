@@ -48,7 +48,7 @@ public interface DishService {
      *
      * @param dishDTO 菜品信息
      */
-    void insert(DishDTO dishDTO);
+    void insertWithFlavor(DishDTO dishDTO);
 
     /**
      * 批量删除菜品

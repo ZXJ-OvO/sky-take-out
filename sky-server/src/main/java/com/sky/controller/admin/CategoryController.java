@@ -3,6 +3,7 @@ package com.sky.controller.admin;
 import com.sky.annotation.PreAuthorize;
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
+import com.sky.entity.CategoryEntity;
 import com.sky.result.PageBean;
 import com.sky.result.Result;
 import com.sky.service.CategoryService;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @author zxj
@@ -35,7 +37,7 @@ public class CategoryController {
      */
     @ApiOperation(value = "新增分类", notes = "新增分类")
     @PostMapping
-    @PreAuthorize("admin:category:insert")
+    @PreAuthorize("admin:category:insertWithFlavor")
     public Result<String> insert(@RequestBody @Validated CategoryDTO categoryDTO) {
         categoryService.insert(categoryDTO);
         return Result.success();
@@ -72,15 +74,13 @@ public class CategoryController {
     /**
      * 分类查询
      *
-     * @param categoryPageQueryDTO 分类分页查询条件
-     * @return Result<PageBean>
      */
-    @ApiOperation(value = "分类查询", notes = "根据类型分页查询分类")
+    @ApiOperation(value = "分类查询", notes = "根据类型查询分类")
     @GetMapping("/list")
     @PreAuthorize("admin:category:list")
-    public Result<PageBean> selectByType(CategoryPageQueryDTO categoryPageQueryDTO) {
-        PageBean pageBean = categoryService.selectByType(categoryPageQueryDTO);
-        return Result.success(pageBean);
+    public Result<List<CategoryEntity>> selectByType(@RequestParam Long type) {
+        List<CategoryEntity> entities = categoryService.selectByType(type);
+        return Result.success(entities);
     }
 
     /**

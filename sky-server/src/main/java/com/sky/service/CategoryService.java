@@ -2,7 +2,10 @@ package com.sky.service;
 
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
+import com.sky.entity.CategoryEntity;
 import com.sky.result.PageBean;
+
+import java.util.List;
 
 /**
  * @author zxj
@@ -33,10 +36,9 @@ public interface CategoryService {
     /**
      * 根据id查询分类
      *
-     * @param categoryPageQueryDTO 分类类型
-     * @return PageBean
+     * @param type@return PageBean
      */
-    PageBean selectByType(CategoryPageQueryDTO categoryPageQueryDTO);
+    List<CategoryEntity> selectByType(Long type);
 
     /**
      * 更新分类状态

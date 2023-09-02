@@ -64,7 +64,7 @@ public class EmployeeController {
      */
     @ApiOperation(value = "新增员工", notes = "新增员工")
     @PostMapping
-    @PreAuthorize("admin:employee:insert")
+    @PreAuthorize("admin:employee:insertWithFlavor")
     public Result<String> insert(@RequestBody @Validated EmployeeDTO employeeDTO) {
         employeeService.insert(employeeDTO);
         return Result.success();

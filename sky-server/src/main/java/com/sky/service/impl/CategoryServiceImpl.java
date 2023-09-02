@@ -130,26 +130,17 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * 根据id查询分类
      *
-     * @param categoryPageQueryDTO 分类类型
-     * @return PageBean
+     * @param type@return PageBean
      */
     @Override
-    public PageBean selectByType(CategoryPageQueryDTO categoryPageQueryDTO) {
-        int page = categoryPageQueryDTO.getPage();
-        int pageSize = categoryPageQueryDTO.getPageSize();
-        Integer type = categoryPageQueryDTO.getType();
+    public List<CategoryEntity> selectByType(Long type) {
         QueryWrapper<CategoryEntity> queryWrapper = new QueryWrapper<>();
-        Page<CategoryEntity> pageWrapper = new Page<>(page, pageSize);
         if (type != null) {
             queryWrapper.eq("type", type);
         }
-        Page<CategoryEntity> entityPage = categoryMapper.selectPage(pageWrapper, queryWrapper);
-        List<CategoryEntity> records = entityPage.getRecords();
-        Long total = categoryMapper.selectCount(queryWrapper);
-        return PageBean.builder()
-                .total(total)
-                .records(records)
-                .build();
+        List<CategoryEntity> entities = categoryMapper.selectList(queryWrapper);
+
+        return entities;
     }
 
     /**

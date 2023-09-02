@@ -72,7 +72,7 @@ public class DishEntity implements Serializable {
      * 更新时间 not null
      */
     @ApiModelProperty(value = "更新时间")
-    @TableField(fill = FieldFill.UPDATE, value = "update_time")
+    @TableField(fill = FieldFill.INSERT_UPDATE, value = "update_time")
     private LocalDateTime updateTime;
     /**
      * 创建人 not null
@@ -84,6 +84,6 @@ public class DishEntity implements Serializable {
      * 更新人 not null
      */
     @ApiModelProperty(value = "更新人")
-    @TableField(fill = FieldFill.UPDATE, value = "update_user")
+    @TableField(fill = FieldFill.INSERT_UPDATE, value = "update_user")
     private Long updateUser;
 }

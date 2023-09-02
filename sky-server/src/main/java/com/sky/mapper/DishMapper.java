@@ -17,6 +17,4 @@ import java.util.List;
 @Mapper
 public interface DishMapper extends BaseMapper<DishEntity> {
     Page<DishVO> pageQuery(DishPageQueryDTO dto);
-
-    DishVO getByIdWithFlavor(Long id);
 }

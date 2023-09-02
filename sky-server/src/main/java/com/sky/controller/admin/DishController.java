@@ -70,8 +70,8 @@ public class DishController {
     @GetMapping("/{id}")
     @PreAuthorize("admin:dish:query")
     public Result<DishVO> selectById(@PathVariable @NotNull(message = "id不能为空") Long id) {
-        DishVO dishEntity = dishService.selectById(id);
-        return Result.success(dishEntity);
+        DishVO dishVO = dishService.selectById(id);
+        return Result.success(dishVO);
     }
 
 

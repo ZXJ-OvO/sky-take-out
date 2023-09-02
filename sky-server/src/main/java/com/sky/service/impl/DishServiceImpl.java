@@ -76,9 +76,25 @@ public class DishServiceImpl implements DishService {
                 .build();
     }
 
+    /**
+     * 根据id查询菜品
+     *
+     * @param id 菜品id
+     * @return 菜品信息
+     */
     @Override
     public DishVO selectById(Long id) {
-        return dishMapper.getByIdWithFlavor(id);
+        DishEntity dishEntity = dishMapper.selectById(id);
+
+        List<DishFlavorEntity> dishFlavorEntities = dishFlavorMapper.getByDishId(id);
+
+        DishVO dishVO = new DishVO();
+
+        BeanUtils.copyProperties(dishEntity, dishVO);
+
+        dishVO.setFlavors(dishFlavorEntities);
+
+        return dishVO;
     }
 
     /**
@@ -132,6 +148,11 @@ public class DishServiceImpl implements DishService {
         dishFlavorMapper.deleteBatchIds(idList);
     }
 
+    /**
+     * 修改菜品
+     *
+     * @param dishDTO 菜品信息
+     */
     @Override
     @Transactional
     public void update(DishDTO dishDTO) {

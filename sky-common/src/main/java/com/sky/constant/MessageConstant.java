@@ -32,4 +32,5 @@ public class MessageConstant {
 
     public static final String ACCOUNT_DISABLED = "账号被禁用";
     public static final String DUPLICATE_USERNAME = "用户名重复";
+    public static final String DISH_NOT_EXIST = "菜品不存在";
 }

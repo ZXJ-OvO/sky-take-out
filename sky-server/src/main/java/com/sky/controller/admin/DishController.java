@@ -61,21 +61,6 @@ public class DishController {
 
 
     /**
-     * 根据分类id查询菜品
-     *
-     * @param dishPageQueryDTO 分页查询条件
-     * @return {@link Result<PageBean>}
-     */
-    @ApiOperation(value = "根据分类id查询菜品", notes = "根据分类id查询菜品")
-    @GetMapping("/list")
-    @PreAuthorize("admin:dish:list")
-    public Result<PageBean> selectByCatId(DishPageQueryDTO dishPageQueryDTO) {
-        PageBean pageBean = dishService.selectByCatId(dishPageQueryDTO);
-        return Result.success(pageBean);
-    }
-
-
-    /**
      * 根据id查询菜品
      *
      * @param id 菜品id

@@ -43,6 +43,12 @@ public class DishServiceImpl implements DishService {
     @Resource
     private SetmealDishMapper setmealDishMapper;
 
+    /**
+     * 菜品状态
+     *
+     * @param status 0停售 1起售
+     * @param id     菜品id
+     */
     @Override
     public void updateStatus(Integer status, Long id) {
         UpdateWrapper<DishEntity> updateWrapper = new UpdateWrapper<>();
@@ -71,15 +77,15 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
-    public PageBean selectByCatId(DishPageQueryDTO dishPageQueryDTO) {
-        return null;
-    }
-
-    @Override
     public DishVO selectById(Long id) {
         return dishMapper.getByIdWithFlavor(id);
     }
 
+    /**
+     * 新增菜品
+     *
+     * @param dishDTO 菜品信息
+     */
     @Override
     @Transactional
     public void insertWithFlavor(DishDTO dishDTO) {
@@ -99,23 +105,31 @@ public class DishServiceImpl implements DishService {
         }
     }
 
+    /**
+     * 批量删除菜品
+     *
+     * @param ids 菜品id数组
+     */
     @Override
     public void batchDeleteByIds(String[] ids) {
         //1. 判断是否有菜品正在售卖 select * from dish where id in (ids) and status=1
-        List<DishEntity> dishs = dishMapper.selectBatchIds(Arrays.asList(ids));
-        if (!dishs.isEmpty()) {
-            throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
+        List<DishEntity> dishes = dishMapper.selectBatchIds(Arrays.asList(ids));
+
+        if (dishes.isEmpty()) {
+            throw new DeletionNotAllowedException(MessageConstant.DISH_NOT_EXIST);
         }
 
-        //2. 判断是否有套餐关联菜品 select count(*) from setmeal_dish where dish_id in (ids)
-        List<SetmealDishEntity> setmealDishes = setmealDishMapper.selectBatchIds(Arrays.asList(ids));
+        List<String> idList = Arrays.asList(ids);
+
+        //2. 判断是否有套餐关联菜品
+        List<SetmealDishEntity> setmealDishes = setmealDishMapper.selectBatchIds(idList);
         if (!setmealDishes.isEmpty()) {
             throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
         }
 
         //3. 删除菜品，删除口味
-        dishMapper.deleteBatchIds(Arrays.asList(ids));
-        dishFlavorMapper.deleteBatchIds(Arrays.asList(ids));
+        dishMapper.deleteBatchIds(idList);
+        dishFlavorMapper.deleteBatchIds(idList);
     }
 
     @Override

@@ -28,14 +28,6 @@ public interface DishService {
     PageBean pageQuery(DishPageQueryDTO dishPageQueryDTO);
 
     /**
-     * 根据分类id查询菜品
-     *
-     * @param dishPageQueryDTO 分页查询条件
-     * @return {@link PageBean}
-     */
-    PageBean selectByCatId(DishPageQueryDTO dishPageQueryDTO);
-
-    /**
      * 根据id查询菜品
      *
      * @param id 菜品id

@@ -10,10 +10,12 @@ import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.DishEntity;
 import com.sky.entity.DishFlavorEntity;
 import com.sky.entity.SetmealDishEntity;
+import com.sky.entity.SetmealEntity;
 import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
+import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageBean;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
@@ -24,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,6 +43,8 @@ public class DishServiceImpl implements DishService {
 
     @Resource
     private SetmealDishMapper setmealDishMapper;
+    @Resource
+    private SetmealMapper setmealMapper;
 
     /**
      * 菜品状态
@@ -50,11 +53,25 @@ public class DishServiceImpl implements DishService {
      * @param id     菜品id
      */
     @Override
+    @Transactional
     public void updateStatus(Integer status, Long id) {
         UpdateWrapper<DishEntity> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("id", id);
         updateWrapper.set("status", status);
         dishMapper.update(null, updateWrapper);
+
+        // 同步修改套餐关联菜品状态
+        List<Long> setmealIds = setmealDishMapper.selectSetmealIds(id);
+
+        if (!setmealIds.isEmpty()) {
+            for (Long setmealId : setmealIds) {
+                SetmealEntity setmealEntity = new SetmealEntity();
+                setmealEntity.setId(setmealId);
+                setmealEntity.setStatus(status);
+                setmealMapper.updateById(setmealEntity);
+            }
+        }
+
     }
 
     /**
@@ -69,6 +86,7 @@ public class DishServiceImpl implements DishService {
         PageHelper.startPage(dishPageQueryDTO.getPage(), dishPageQueryDTO.getPageSize());
         //2. 调用mapper分页条件查询
         Page<DishVO> page = dishMapper.pageQuery(dishPageQueryDTO);
+        log.info("分页查询结果:{}", page.getResult());
 
         return PageBean.builder()
                 .total(page.getTotal())
@@ -162,11 +180,16 @@ public class DishServiceImpl implements DishService {
         //1. 更新菜品主体数据
         dishMapper.updateById(dish);
         //2. 删除原来口味
-        dishFlavorMapper.deleteBatchIds(Collections.singletonList(dishDTO.getId()));
+        Long id = dishDTO.getId();
+
+        dishFlavorMapper.deleteBatchIds(Arrays.asList(id));
         //3. 添加新口味
-        dishDTO.getFlavors().forEach(dishFlavor -> {
-            dishFlavor.setDishId(dish.getId());
-            dishFlavorMapper.insert(dishFlavor);
+        List<DishFlavorEntity> flavors = dishDTO.getFlavors();
+
+        flavors.forEach(dishFlavor -> {
+            dishFlavor.setDishId(id);
+
         });
+        dishFlavorMapper.batchInsert(flavors);
     }
 }

@@ -13,7 +13,7 @@
                 and dish.name like concat('%',#{name},'%')
             </if>
             <if test="categoryId != null">
-                and dish.category_id = #{status}
+                and dish.category_id = #{categoryId}
             </if>
             <if test="status != null">
                 and dish.status = #{status}

@@ -2,30 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.DishFlavorMapper">
-    <resultMap id="dishFlavorResultMap" type="com.sky.vo.DishVO" autoMapping="true">
-        <!--一的一方-->
-        <result property="id" column="id"/>
-        <!--多的一方-->
-        <collection property="flavors" ofType="com.sky.entity.DishFlavorEntity">
-            <result property="id" column="df_id"/>
-            <result property="dishId" column="df_dish_id"/>
-            <result property="name" column="df_name"/>
-            <result property="value" column="df_value"/>
-        </collection>
-    </resultMap>
-
-    <select id="getByIdWithFlavor" resultMap="dishFlavorResultMap">
-        select d.*,
-               df.id      df_id,
-               df.dish_id df_dish_id,
-               df.name    df_name,
-               df.value   df_value
-        from dish d,
-             dish_flavor df
-        where d.id = df.dish_id
-          and d.id = #{id}
-    </select>
-
+    <insert id="batchInsert">
+        insert into dish_flavor(dish_id, name, value)
+        values
+        <foreach collection="flavors" item="item" separator=",">
+            (#{item.dishId}, #{item.name}, #{item.value})
+        </foreach>
+    </insert>
     <select id="getByDishId" resultType="com.sky.entity.DishFlavorEntity">
         select *
         from dish_flavor

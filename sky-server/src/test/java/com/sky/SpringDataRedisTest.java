@@ -6,9 +6,12 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class SpringDataRedisTest {
@@ -53,5 +56,22 @@ public class SpringDataRedisTest {
         hashOperations.delete("100", "age");
     }
 
+    @Test
+    public void testDeleteFile() {
+        // 替换为你要删除的文件路径
+        String filePath = "C:\\Users\\root\\AppData\\Local\\Temp\\tomcat.8080.1905430256023132042\\work\\Tomcat\\localhost\\ROOT\\upload_83cc6cfc_ea3d_4002_86cb_49922540897b_00000000.tmp";
+
+        File fileToDelete = new File(filePath);
+
+        // 测试文件是否存在，是否可写，是否删除成功
+        assertTrue(fileToDelete.exists(), "文件不存在");
+        assertTrue(fileToDelete.canWrite(), "文件不可写");
+
+        // 尝试删除文件
+        boolean deleted = fileToDelete.delete();
+
+        // 断言文件删除成功
+        assertTrue(deleted, "文件删除失败");
+    }
 
 }

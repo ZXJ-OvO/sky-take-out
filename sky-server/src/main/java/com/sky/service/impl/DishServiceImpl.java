@@ -1,12 +1,31 @@
 package com.sky.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.sky.constant.MessageConstant;
+import com.sky.constant.StatusConstant;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.DishEntity;
+import com.sky.entity.DishFlavorEntity;
+import com.sky.entity.SetmealDishEntity;
+import com.sky.exception.DeletionNotAllowedException;
+import com.sky.mapper.DishFlavorMapper;
+import com.sky.mapper.DishMapper;
+import com.sky.mapper.SetmealDishMapper;
 import com.sky.result.PageBean;
 import com.sky.service.DishService;
+import com.sky.vo.DishVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author zxj
@@ -15,14 +34,40 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class DishServiceImpl implements DishService {
 
+    @Resource
+    private DishMapper dishMapper;
+
+    @Resource
+    private DishFlavorMapper dishFlavorMapper;
+
+    @Resource
+    private SetmealDishMapper setmealDishMapper;
+
     @Override
     public void updateStatus(Integer status, Long id) {
-
+        UpdateWrapper<DishEntity> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", id);
+        updateWrapper.set("status", status);
+        dishMapper.update(null, updateWrapper);
     }
 
+    /**
+     * 分页查询
+     *
+     * @param dishPageQueryDTO 分页查询条件
+     * @return 分页结果
+     */
     @Override
     public PageBean pageQuery(DishPageQueryDTO dishPageQueryDTO) {
-        return null;
+        //1. 开启分页
+        PageHelper.startPage(dishPageQueryDTO.getPage(), dishPageQueryDTO.getPageSize());
+        //2. 调用mapper分页条件查询
+        Page<DishVO> page = dishMapper.pageQuery(dishPageQueryDTO);
+
+        return PageBean.builder()
+                .total(page.getTotal())
+                .records(page.getResult())
+                .build();
     }
 
     @Override
@@ -31,22 +76,57 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
-    public DishEntity selectById(Long id) {
-        return null;
+    public DishVO selectById(Long id) {
+        return dishMapper.getByIdWithFlavor(id);
     }
 
     @Override
     public void insert(DishDTO dishDTO) {
+        DishEntity dishEntity = new DishEntity();
+        BeanUtils.copyProperties(dishDTO, dishEntity);
+        dishEntity.setStatus(StatusConstant.DISABLE);
+        dishMapper.insert(dishEntity);
 
+        List<DishFlavorEntity> flavors = dishDTO.getFlavors();
+        flavors.forEach(dishFlavorEntity -> {
+            dishFlavorEntity.setDishId(dishEntity.getId());
+            dishFlavorMapper.insert(dishFlavorEntity);
+        });
     }
 
     @Override
     public void batchDeleteByIds(String[] ids) {
+        //1. 判断是否有菜品正在售卖 select * from dish where id in (ids) and status=1
+        List<DishEntity> dishs = dishMapper.selectBatchIds(Arrays.asList(ids));
+        if (!dishs.isEmpty()) {
+            throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
+        }
 
+        //2. 判断是否有套餐关联菜品 select count(*) from setmeal_dish where dish_id in (ids)
+        List<SetmealDishEntity> setmealDishes = setmealDishMapper.selectBatchIds(Arrays.asList(ids));
+        if (!setmealDishes.isEmpty()) {
+            throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
+        }
+
+        //3. 删除菜品，删除口味
+        dishMapper.deleteBatchIds(Arrays.asList(ids));
+        dishFlavorMapper.deleteBatchIds(Arrays.asList(ids));
     }
 
     @Override
+    @Transactional
     public void update(DishDTO dishDTO) {
+        DishEntity dish = new DishEntity();
+        BeanUtils.copyProperties(dishDTO, dish);
 
+        //1. 更新菜品主体数据
+        dishMapper.updateById(dish);
+        //2. 删除原来口味
+        dishFlavorMapper.deleteBatchIds(Collections.singletonList(dishDTO.getId()));
+        //3. 添加新口味
+        dishDTO.getFlavors().forEach(dishFlavor -> {
+            dishFlavor.setDishId(dish.getId());
+            dishFlavorMapper.insert(dishFlavor);
+        });
     }
 }

@@ -3,4 +3,39 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.DishMapper">
 
+    <select id="pageQuery" resultType="com.sky.vo.DishVO">
+        select d.*, c.name categoryName
+        from dish d
+        left join category c on c.id = d.category_id
+        <where>
+            <if test="name != null and name != ''">and d.name like concat('%', #{name}, '%')</if>
+            <if test="categoryId != null">and category_id = #{categoryId}</if>
+            <if test="status != null">and d.status = #{status}</if>
+        </where>
+        order by update_time desc
+    </select>
+
+    <resultMap id="dishFlavorResultMap" type="com.sky.vo.DishVO" autoMapping="true">
+        <!--一的一方-->
+        <result property="id" column="id"/>
+        <!--多的一方-->
+        <collection property="flavors" ofType="com.sky.entity.DishFlavorEntity">
+            <result property="id" column="df_id"/>
+            <result property="dishId" column="df_dish_id"/>
+            <result property="name" column="df_name"/>
+            <result property="value" column="df_value"/>
+        </collection>
+    </resultMap>
+
+    <select id="getByIdWithFlavor" resultMap="dishFlavorResultMap">
+        select d.*,
+               df.id      df_id,
+               df.dish_id df_dish_id,
+               df.name    df_name,
+               df.value   df_value
+        from dish d,
+             dish_flavor df
+        where d.id = df.dish_id
+          and d.id = #{id}
+    </select>
 </mapper>

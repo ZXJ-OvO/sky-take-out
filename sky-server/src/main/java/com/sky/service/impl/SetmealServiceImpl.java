@@ -90,4 +90,33 @@ public class SetmealServiceImpl implements SetmealService {
         log.info("vo:{}", vo);
         return vo;
     }
+
+    @Transactional
+    @Override
+    public void update(SetmealDTO setmealDTO) {
+        SetmealEntity setmealEntity = new SetmealEntity();
+        BeanUtils.copyProperties(setmealDTO, setmealEntity);
+        List<SetmealDishEntity> setmealDishes = setmealDTO.getSetmealDishes();
+        // TODO: 2023/9/3 setmeal_dish 表没有设置setmeal_id,没有删除原有的关系信息
+        log.info("setmealDishes:{}", setmealDishes);
+        // 更新套餐主体信息
+        setmealMapper.updateById(setmealEntity);
+
+        // 更新套餐菜品关系信息
+        // 先删除原有的关系信息
+        // 前端没有传递setmealId,需要先查询出来
+        Long id = setmealEntity.getId();
+
+        QueryWrapper<SetmealDishEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("setmeal_id", id);
+        setmealDishMapper.delete(queryWrapper);
+
+        // 给setmealDish设置setmealId
+        // 再插入新的关系信息
+        for (SetmealDishEntity setmealDish : setmealDishes) {
+            setmealDish.setSetmealId(id);
+            setmealDishMapper.insert(setmealDish);
+        }
+
+    }
 }

@@ -1,6 +1,8 @@
 package com.sky.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.houbb.sensitive.word.core.SensitiveWordHelper;
+import com.github.houbb.sensitive.word.support.result.WordResultHandlers;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.dto.SetmealDTO;
@@ -8,6 +10,7 @@ import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.CategoryEntity;
 import com.sky.entity.SetmealDishEntity;
 import com.sky.entity.SetmealEntity;
+import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.CategoryMapper;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -58,7 +62,17 @@ public class SetmealServiceImpl implements SetmealService {
         // 保存套餐主体信息
         SetmealEntity setmealEntity = new SetmealEntity();
         BeanUtils.copyProperties(setmealDTO, setmealEntity);
+
+
+        // 信息过滤
+        List<String> wordList = SensitiveWordHelper.findAll(setmealEntity.getDescription(), WordResultHandlers.word());
+        log.info("检测到敏感词:{}", wordList);
+        String replace = SensitiveWordHelper.replace(setmealEntity.getDescription());
+        log.info("替换后的描述:{}", replace);
+        setmealEntity.setDescription(replace);
         setmealMapper.insert(setmealEntity);
+
+
         // 保存套餐菜品关系信息
         for (SetmealDishEntity setmealDishEntity : setmealDishEntities) {
             setmealDishEntity.setSetmealId(setmealEntity.getId());
@@ -97,7 +111,14 @@ public class SetmealServiceImpl implements SetmealService {
         SetmealEntity setmealEntity = new SetmealEntity();
         BeanUtils.copyProperties(setmealDTO, setmealEntity);
         List<SetmealDishEntity> setmealDishes = setmealDTO.getSetmealDishes();
-        // TODO: 2023/9/3 setmeal_dish 表没有设置setmeal_id,没有删除原有的关系信息
+
+        // 信息过滤
+        List<String> wordList = SensitiveWordHelper.findAll(setmealEntity.getDescription(), WordResultHandlers.word());
+        log.info("检测到敏感词:{}", wordList);
+        String replace = SensitiveWordHelper.replace(setmealEntity.getDescription());
+        log.info("替换后的描述:{}", replace);
+        setmealEntity.setDescription(replace);
+
         log.info("setmealDishes:{}", setmealDishes);
         // 更新套餐主体信息
         setmealMapper.updateById(setmealEntity);
@@ -119,4 +140,28 @@ public class SetmealServiceImpl implements SetmealService {
         }
 
     }
+
+    @Override
+    public void delete(String ids) {
+        String[] idArr = ids.split(",");
+        List<String> idList = Arrays.asList(idArr);
+
+        for (String id : idList) {
+            SetmealEntity entity = setmealMapper.selectById(id);
+            Integer status = entity.getStatus();
+            if (status == 1) {
+                throw new DeletionNotAllowedException("套餐已上架,不能删除");
+            }
+            setmealMapper.deleteById(id);
+        }
+    }
+
+    @Override
+    public void updateStatus(Integer status, Long id) {
+        SetmealEntity setmealEntity = new SetmealEntity();
+        setmealEntity.setId(id);
+        setmealEntity.setStatus(status);
+        setmealMapper.updateById(setmealEntity);
+    }
+
 }

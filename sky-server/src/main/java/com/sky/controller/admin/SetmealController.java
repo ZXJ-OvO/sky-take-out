@@ -45,4 +45,17 @@ public class SetmealController {
         setmealService.update(setmealDTO);
         return Result.success();
     }
+
+    @DeleteMapping()
+    public Result<String> delete(@RequestParam @NotNull(message = "套餐id不能为null") String ids) {
+        setmealService.delete(ids);
+        return Result.success();
+    }
+
+    @PostMapping("/status/{status}")
+    public Result<String> updateStatus(@PathVariable @NotNull(message = "状态值不能为null") Integer status, @RequestParam @NotNull(message = "套餐id不能为null") Long id) {
+        setmealService.updateStatus(status, id);
+        return Result.success();
+    }
+
 }

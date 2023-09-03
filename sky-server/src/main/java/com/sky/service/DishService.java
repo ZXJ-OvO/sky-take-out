@@ -6,6 +6,8 @@ import com.sky.entity.DishEntity;
 import com.sky.result.PageBean;
 import com.sky.vo.DishVO;
 
+import java.util.List;
+
 /**
  * @author zxj
  */
@@ -55,4 +57,7 @@ public interface DishService {
      * @param dishDTO 菜品信息
      */
     void update(DishDTO dishDTO);
+
+
+    List<DishEntity> listByCategoryId(Long categoryId);
 }

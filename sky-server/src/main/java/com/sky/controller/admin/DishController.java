@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @author root
@@ -117,6 +118,13 @@ public class DishController {
     public Result<String> update(@RequestBody DishDTO dishDTO) {
         dishService.update(dishDTO);
         return Result.success();
+    }
+
+    @GetMapping("/list")
+    @PreAuthorize("admin:dish:list")
+    public Result<List<DishEntity>> list(@RequestParam @NotNull(message = "分类id不能为空") Long categoryId) {
+        List<DishEntity> vos = dishService.listByCategoryId(categoryId);
+        return Result.success(vos);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.sky.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
@@ -192,4 +193,13 @@ public class DishServiceImpl implements DishService {
         });
         dishFlavorMapper.batchInsert(flavors);
     }
+
+    @Override
+    public List<DishEntity> listByCategoryId(Long categoryId) {
+        return new LambdaQueryChainWrapper<>(dishMapper)
+                .eq(DishEntity::getCategoryId, categoryId)
+                .list();
+    }
+
+
 }

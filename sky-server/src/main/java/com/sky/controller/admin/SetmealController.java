@@ -1,14 +1,13 @@
 package com.sky.controller.admin;
 
+import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.result.PageBean;
 import com.sky.result.Result;
 import com.sky.service.SetmealService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -26,4 +25,12 @@ public class SetmealController {
         PageBean pageBean = setmealService.pageQuery(setmealPageQueryDTO);
         return Result.success(pageBean);
     }
+
+    @PostMapping
+    public Result insert(@RequestBody SetmealDTO setmealDTO) {
+        setmealService.insert(setmealDTO);
+        return Result.success();
+    }
+
+
 }

@@ -1,6 +1,6 @@
 package com.sky.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +23,7 @@ public class SetmealEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @TableId(type = IdType.AUTO)
     private Long id;
     private Long categoryId;    //分类id
     private String name;    //套餐名称
@@ -30,8 +31,12 @@ public class SetmealEntity implements Serializable {
     private Integer status;    //状态 0:停用 1:启用
     private String description;    //描述信息
     private String image;    //图片
+    @TableField(fill = FieldFill.INSERT, value = "create_time")
     private LocalDateTime createTime;
+    @TableField(fill = FieldFill.INSERT_UPDATE, value = "update_time")
     private LocalDateTime updateTime;
+    @TableField(fill = FieldFill.INSERT, value = "create_user")
     private Long createUser;
+    @TableField(fill = FieldFill.INSERT_UPDATE, value = "update_user")
     private Long updateUser;
 }

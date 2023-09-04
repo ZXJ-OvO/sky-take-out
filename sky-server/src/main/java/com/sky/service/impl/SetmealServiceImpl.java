@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.houbb.sensitive.word.core.SensitiveWordHelper;
 import com.github.houbb.sensitive.word.support.result.WordResultHandlers;
@@ -195,6 +196,14 @@ public class SetmealServiceImpl implements SetmealService {
         setmealMapper.updateById(setmealEntity);
 
         // status=1 起售
+    }
+
+    @Override
+    public List<SetmealEntity> selectByCategoryId(Long categoryId) {
+
+        LambdaQueryWrapper<SetmealEntity> lambdaQueryWrapper = new LambdaQueryWrapper<SetmealEntity>().eq(SetmealEntity::getCategoryId, categoryId);
+        List<SetmealEntity> entities = setmealMapper.selectList(lambdaQueryWrapper);
+        return entities;
     }
 
 }

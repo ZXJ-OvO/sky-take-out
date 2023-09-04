@@ -141,10 +141,12 @@ public class SetmealServiceImpl implements SetmealService {
 
     }
 
+    @Transactional
     @Override
     public void delete(String ids) {
         String[] idArr = ids.split(",");
         List<String> idList = Arrays.asList(idArr);
+        log.info("idList:{}", idList);
 
         for (String id : idList) {
             SetmealEntity entity = setmealMapper.selectById(id);
@@ -153,6 +155,9 @@ public class SetmealServiceImpl implements SetmealService {
                 throw new DeletionNotAllowedException("套餐已上架,不能删除");
             }
             setmealMapper.deleteById(id);
+            QueryWrapper<SetmealDishEntity> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("setmeal_id", id);
+            setmealDishMapper.delete(queryWrapper);
         }
     }
 

@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
@@ -226,6 +227,13 @@ public class DishServiceImpl implements DishService {
         return new LambdaQueryChainWrapper<>(dishMapper)
                 .eq(DishEntity::getCategoryId, categoryId)
                 .list();
+    }
+
+    @Override
+    public List<DishEntity> selectByCategoryId(Long categoryId) {
+        LambdaQueryWrapper<DishEntity> lambdaQueryWrapper = new LambdaQueryWrapper<DishEntity>().eq(DishEntity::getCategoryId, categoryId);
+        List<DishEntity> entities = dishMapper.selectList(lambdaQueryWrapper);
+        return entities;
     }
 
 

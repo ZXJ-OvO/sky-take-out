@@ -60,4 +60,6 @@ public interface DishService {
 
 
     List<DishEntity> listByCategoryId(Long categoryId);
+
+    List<DishEntity> selectByCategoryId(Long categoryId);
 }

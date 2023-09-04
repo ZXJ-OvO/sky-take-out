@@ -3,6 +3,7 @@ package com.sky.controller.user;
 import com.sky.entity.DishEntity;
 import com.sky.result.Result;
 import com.sky.service.DishService;
+import com.sky.vo.DishVO;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,9 +23,9 @@ public class DishController {
     private DishService dishService;
 
     @GetMapping("/list")
-    public Result<List<DishEntity>> selectByType(Long categoryId) {
-        List<DishEntity> entities = dishService.selectByCategoryId(categoryId);
-        return Result.success(entities);
+    public Result<List<DishVO>> selectByCategoryId(Long categoryId) {
+        List<DishVO> dishVOS = dishService.selectByCategoryId(categoryId);
+        return Result.success(dishVOS);
     }
 
 }

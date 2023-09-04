@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -230,10 +231,25 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
-    public List<DishEntity> selectByCategoryId(Long categoryId) {
-        LambdaQueryWrapper<DishEntity> lambdaQueryWrapper = new LambdaQueryWrapper<DishEntity>().eq(DishEntity::getCategoryId, categoryId);
+    public List<DishVO> selectByCategoryId(Long categoryId) {
+        LambdaQueryWrapper<DishEntity> lambdaQueryWrapper = new LambdaQueryWrapper<DishEntity>()
+                .eq(DishEntity::getCategoryId, categoryId)
+                .eq(DishEntity::getStatus, 1);
         List<DishEntity> entities = dishMapper.selectList(lambdaQueryWrapper);
-        return entities;
+        ArrayList<DishVO> dishVos = new ArrayList<>();
+        for (DishEntity entity : entities) {
+            DishVO dishVO = new DishVO();
+            BeanUtils.copyProperties(entity, dishVO);
+            dishVos.add(dishVO);
+        }
+        for (DishVO dishVo : dishVos) {
+            Long id = dishVo.getId();
+            LambdaQueryWrapper<DishFlavorEntity> wrapper = new LambdaQueryWrapper<DishFlavorEntity>().eq(DishFlavorEntity::getDishId, id);
+            List<DishFlavorEntity> flavorEntities = dishFlavorMapper.selectList(wrapper);
+            dishVo.setFlavors(flavorEntities);
+        }
+
+        return dishVos;
     }
 
 

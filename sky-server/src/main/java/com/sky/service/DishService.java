@@ -61,5 +61,5 @@ public interface DishService {
 
     List<DishEntity> listByCategoryId(Long categoryId);
 
-    List<DishEntity> selectByCategoryId(Long categoryId);
+    List<DishVO> selectByCategoryId(Long categoryId);
 }

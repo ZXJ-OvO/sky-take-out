@@ -14,3 +14,7 @@ minio:
   bucketName: sky-take-out #存储桶名称
   accessKey: Mkq2NvS3ijP2rVyNiNPT #访问的key
   secretKey: HPA2hP289vNst7jUA8fALib1ydgOxWpi8kyowncf #访问的秘钥
+
+wechat:
+  appid: wxa207b007c4fe4673
+  secret: a6528a669f56834ae663d26037391c74

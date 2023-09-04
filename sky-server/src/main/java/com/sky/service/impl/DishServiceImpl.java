@@ -190,7 +190,15 @@ public class DishServiceImpl implements DishService {
         //2. 删除原来口味
         Long id = dishDTO.getId();
 
-        dishFlavorMapper.deleteBatchIds(Arrays.asList(id));
+        QueryWrapper<DishFlavorEntity> flavourWrapper = new QueryWrapper<>();
+        flavourWrapper.eq("dish_id", id);
+        List<DishFlavorEntity> flavorEntities = dishFlavorMapper.selectList(flavourWrapper);
+        if (!flavorEntities.isEmpty()) {
+            for (DishFlavorEntity flavorEntity : flavorEntities) {
+                dishFlavorMapper.deleteById(flavorEntity);
+            }
+        }
+
         //3. 添加新口味
         List<DishFlavorEntity> flavors = dishDTO.getFlavors();
 

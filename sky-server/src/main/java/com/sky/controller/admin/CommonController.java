@@ -1,8 +1,8 @@
 package com.sky.controller.admin;
 
+import com.sky.properties.MinioProp;
 import com.sky.result.Result;
 import com.sky.service.MinioService;
-import com.sky.properties.MinioProp;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +36,7 @@ public class CommonController {
 
     @PostMapping("/upload")
     public Result<String> uploadFile(MultipartFile file) {
+        // TODO: 2023/9/4 文件名的bug待处理
         try {
             String fileName = file.getOriginalFilename();
             assert fileName != null;

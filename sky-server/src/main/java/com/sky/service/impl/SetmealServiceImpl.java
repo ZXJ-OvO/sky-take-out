@@ -8,10 +8,13 @@ import com.github.pagehelper.PageHelper;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.CategoryEntity;
+import com.sky.entity.DishEntity;
 import com.sky.entity.SetmealDishEntity;
 import com.sky.entity.SetmealEntity;
 import com.sky.exception.DeletionNotAllowedException;
+import com.sky.exception.UpdateSetmealStatusException;
 import com.sky.mapper.CategoryMapper;
+import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageBean;
@@ -38,6 +41,9 @@ public class SetmealServiceImpl implements SetmealService {
 
     @Resource
     private CategoryMapper categoryMapper;
+
+    @Resource
+    private DishMapper dishMapper;
 
     @Override
     public PageBean pageQuery(SetmealPageQueryDTO setmealPageQueryDTO) {
@@ -167,14 +173,28 @@ public class SetmealServiceImpl implements SetmealService {
 
     @Override
     public void updateStatus(Integer status, Long id) {
+
+        if (status == 1) {
+            // 起售需要判断套餐中是否存在菜品是禁售的状态（状态值为0）
+            QueryWrapper<SetmealDishEntity> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("setmeal_id", id);
+            List<SetmealDishEntity> setmealDishEntities = setmealDishMapper.selectList(queryWrapper);
+            for (SetmealDishEntity setmealDishEntity : setmealDishEntities) {
+                Long dishId = setmealDishEntity.getDishId();
+                DishEntity dishEntity = dishMapper.selectById(dishId);
+                Integer dishStatus = dishEntity.getStatus();
+                if (dishStatus == 0) {
+                    throw new UpdateSetmealStatusException("套餐中存在禁售的菜品,不能上架");
+                }
+            }
+        }
+
         SetmealEntity setmealEntity = new SetmealEntity();
         setmealEntity.setId(id);
         setmealEntity.setStatus(status);
         setmealMapper.updateById(setmealEntity);
-        // TODO: 2023/9/4 起售：检查所有菜品状态，如果存在未上架的菜品，套餐状态不能上架
-        // TODO: 2023/9/4 如果菜品删除，对应套餐也应该被同步删除吗？
-        // TODO: 2023/9/4 如果菜品库存为0，对应套餐也应该被同步下架吗？
-        // TODO: 2023/9/4 删除逻辑和库存逻辑能否合并？
+
+        // status=1 起售
     }
 
 }

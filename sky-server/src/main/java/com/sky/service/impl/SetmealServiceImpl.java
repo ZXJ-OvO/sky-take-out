@@ -171,7 +171,10 @@ public class SetmealServiceImpl implements SetmealService {
         setmealEntity.setId(id);
         setmealEntity.setStatus(status);
         setmealMapper.updateById(setmealEntity);
-        // TODO: 2023/9/4 检查套餐中是否存在未起售的菜品
+        // TODO: 2023/9/4 起售：检查所有菜品状态，如果存在未上架的菜品，套餐状态不能上架
+        // TODO: 2023/9/4 如果菜品删除，对应套餐也应该被同步删除吗？
+        // TODO: 2023/9/4 如果菜品库存为0，对应套餐也应该被同步下架吗？
+        // TODO: 2023/9/4 删除逻辑和库存逻辑能否合并？
     }
 
 }

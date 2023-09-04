@@ -1,8 +1,11 @@
 package com.sky.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sky.constant.JwtClaimsConstant;
+import com.sky.constant.RedisConstant;
 import com.sky.constant.WeChatConstant;
 import com.sky.dto.UserLoginDTO;
 import com.sky.entity.UserEntity;
@@ -15,10 +18,12 @@ import com.sky.utils.HttpClientUtil;
 import com.sky.utils.JwtUtil;
 import com.sky.vo.UserLoginVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zxj
@@ -35,6 +40,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private JwtProperties jwtProperties;
+
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
     /**
      * 用户登录
@@ -76,10 +84,18 @@ public class UserServiceImpl implements UserService {
                 jwtProperties.getUserTtl(),
                 claims);
 
-        return UserLoginVO.builder()
+        UserLoginVO userLoginVO = UserLoginVO.builder()
                 .openid(openid)
                 .token(token)
                 .id(userEntity.getId())
                 .build();
+
+        String tokenValue = JSONUtil.toJsonStr(userLoginVO);
+        String tokenKey = RedisConstant.LOGIN_USER_KEY + token;
+        long ttl = RandomUtil.randomLong(-5, 5) + RedisConstant.LOGIN_USER_TTL;
+
+        redisTemplate.opsForValue().set(tokenKey, tokenValue, ttl, TimeUnit.MINUTES);
+
+        return userLoginVO;
     }
 }

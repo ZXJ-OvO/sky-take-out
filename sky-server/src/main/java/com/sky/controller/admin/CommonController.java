@@ -39,7 +39,6 @@ public class CommonController {
         // TODO: 2023/9/4 文件名的bug待处理
         try {
             String fileName = file.getOriginalFilename();
-            assert fileName != null;
 
             // 根据业务设计，设置存储路径：按天创建目录
             String objectName = new SimpleDateFormat("yyyy-MM-dd/").format(new Date())

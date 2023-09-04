@@ -10,9 +10,6 @@ package com.sky.exception;
  */
 public class InvalidOpenIdException extends BaseException {
 
-    public InvalidOpenIdException() {
-    }
-
     public InvalidOpenIdException(String msg) {
         super(msg);
     }

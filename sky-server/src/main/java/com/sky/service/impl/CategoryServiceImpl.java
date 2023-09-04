@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sky.dto.CategoryDTO;
@@ -186,4 +187,5 @@ public class CategoryServiceImpl implements CategoryService {
         // 3、从本地线程中拿到id，设置更新人，更新数据库，交给MetaObjectHandler处理
         categoryMapper.updateById(categoryEntity);
     }
+
 }

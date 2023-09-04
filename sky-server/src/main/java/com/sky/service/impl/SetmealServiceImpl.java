@@ -20,6 +20,8 @@ import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageBean;
 import com.sky.service.SetmealService;
+import com.sky.vo.DishItemVO;
+import com.sky.vo.DishVO;
 import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -204,6 +206,12 @@ public class SetmealServiceImpl implements SetmealService {
         LambdaQueryWrapper<SetmealEntity> lambdaQueryWrapper = new LambdaQueryWrapper<SetmealEntity>().eq(SetmealEntity::getCategoryId, categoryId);
         List<SetmealEntity> entities = setmealMapper.selectList(lambdaQueryWrapper);
         return entities;
+    }
+
+    @Override
+    public List<DishItemVO> selectSetmealDishes(Long id) {
+        List<DishItemVO> dishItemVos = setmealDishMapper.selectSetmealIncludeDishes(id);
+        return dishItemVos;
     }
 
 }

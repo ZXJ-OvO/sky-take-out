@@ -203,7 +203,9 @@ public class SetmealServiceImpl implements SetmealService {
     @Override
     public List<SetmealEntity> selectByCategoryId(Long categoryId) {
 
-        LambdaQueryWrapper<SetmealEntity> lambdaQueryWrapper = new LambdaQueryWrapper<SetmealEntity>().eq(SetmealEntity::getCategoryId, categoryId);
+        LambdaQueryWrapper<SetmealEntity> lambdaQueryWrapper = new LambdaQueryWrapper<SetmealEntity>()
+                .eq(SetmealEntity::getCategoryId, categoryId)
+                .eq(SetmealEntity::getStatus, 1);
         List<SetmealEntity> entities = setmealMapper.selectList(lambdaQueryWrapper);
         return entities;
     }

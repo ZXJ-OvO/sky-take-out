@@ -87,15 +87,19 @@ public class SetmealServiceImpl implements SetmealService {
 
     @Override
     public SetmealVO selectById(Long id) {
+        // 根据id查询套餐
         SetmealEntity entity = setmealMapper.selectById(id);
+        // 查到的主体数据交给vo，查到的数据没有套餐菜品的List，没有分类名称
         SetmealVO vo = new SetmealVO();
         BeanUtils.copyProperties(entity, vo);
 
+        // 根据categoryId查询分类名称
         Long categoryId = entity.getCategoryId();
         CategoryEntity categoryEntity = categoryMapper.selectById(categoryId);
         String name = categoryEntity.getName();
         vo.setCategoryName(name);
 
+        // 查询套餐菜品关系信息
         QueryWrapper<SetmealDishEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("setmeal_id", id);
         List<SetmealDishEntity> dishEntities = setmealDishMapper.selectList(queryWrapper);
@@ -167,6 +171,7 @@ public class SetmealServiceImpl implements SetmealService {
         setmealEntity.setId(id);
         setmealEntity.setStatus(status);
         setmealMapper.updateById(setmealEntity);
+        // TODO: 2023/9/4 检查套餐中是否存在未起售的菜品
     }
 
 }

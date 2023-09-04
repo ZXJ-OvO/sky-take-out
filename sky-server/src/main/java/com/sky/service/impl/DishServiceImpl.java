@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.github.pagehelper.Page;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -192,6 +194,18 @@ public class DishServiceImpl implements DishService {
 
         });
         dishFlavorMapper.batchInsert(flavors);
+
+        // 需要修改套餐关联菜品的数据
+        QueryWrapper<SetmealDishEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("dish_id", id);
+        List<SetmealDishEntity> list = setmealDishMapper.selectList(queryWrapper);
+        list.forEach(setmealDishEntity -> {
+            String name = dish.getName();
+            BigDecimal price = dish.getPrice();
+            setmealDishEntity.setName(name);
+            setmealDishEntity.setPrice(price);
+            setmealDishMapper.updateById(setmealDishEntity);
+        });
     }
 
     @Override

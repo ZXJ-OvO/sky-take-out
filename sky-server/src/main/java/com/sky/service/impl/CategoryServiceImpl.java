@@ -1,6 +1,5 @@
 package com.sky.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sky.dto.CategoryDTO;
@@ -139,6 +138,8 @@ public class CategoryServiceImpl implements CategoryService {
         if (type != null) {
             queryWrapper.eq("type", type);
         }
+        queryWrapper.eq("status", 1);
+        queryWrapper.orderByAsc("sort");
         List<CategoryEntity> entities = categoryMapper.selectList(queryWrapper);
 
         return entities;

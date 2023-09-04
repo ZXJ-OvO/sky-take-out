@@ -32,4 +32,5 @@ public class CategoryController {
         List<CategoryEntity> entities = categoryService.selectByType(type);
         return Result.success(entities);
     }
+
 }

@@ -159,14 +159,19 @@ public class DishServiceImpl implements DishService {
         List<String> idList = Arrays.asList(ids);
 
         //2. 判断是否有套餐关联菜品
-        List<SetmealDishEntity> setmealDishEntities = setmealDishMapper.selectBatchIds(idList);
-        if (!setmealDishEntities.isEmpty()) {
-            throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
+        for (String id : ids) {
+            QueryWrapper<SetmealDishEntity> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("dish_id", id);
+            List<SetmealDishEntity> setmealDishEntities = setmealDishMapper.selectList(queryWrapper);
+            if (!setmealDishEntities.isEmpty()) {
+                throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
+            }
         }
 
         //3. 删除菜品，删除口味
         dishMapper.deleteBatchIds(idList);
         dishFlavorMapper.deleteBatchIds(idList);
+
     }
 
     /**

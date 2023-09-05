@@ -3,4 +3,18 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.SetmealDishMapper">
 
+    <select id="selectSetmealIds" resultType="java.lang.Long">
+        select setmeal_id
+        from setmeal_dish
+        where dish_id = #{dishId}
+    </select>
+    <select id="selectSetmealIncludeDishes" resultType="com.sky.vo.DishItemVO">
+        select setmeal_dish.name,
+               setmeal_dish.copies,
+               dish.description,
+               dish.image
+        from setmeal_dish
+                 left join dish on setmeal_dish.dish_id = dish.id
+        where setmeal_dish.setmeal_id = #{id}
+    </select>
 </mapper>

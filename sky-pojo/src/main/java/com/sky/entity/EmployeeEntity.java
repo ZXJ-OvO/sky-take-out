@@ -1,16 +1,12 @@
 package com.sky.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -28,6 +24,9 @@ public class EmployeeEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * 主键 not null unique
+     */
     @TableId(type = IdType.AUTO)
     @ApiModelProperty(value = "主键")
     private Long id;
@@ -69,27 +68,25 @@ public class EmployeeEntity implements Serializable {
     /**
      * 创建时间 null
      */
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @TableField(value = "create_time")
+    @TableField(fill = FieldFill.INSERT, value = "create_time")
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;
     /**
      * 更新时间 null
      */
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @TableField(value = "update_time")
+    @TableField(fill = FieldFill.INSERT_UPDATE, value = "update_time")
     @ApiModelProperty(value = "更新时间")
     private LocalDateTime updateTime;
     /**
      * 创建人 null
      */
-    @TableField(value = "create_user")
     @ApiModelProperty(value = "创建人")
+    @TableField(fill = FieldFill.INSERT, value = "create_user")
     private Long createUser;
     /**
      * 修改人 null
      */
-    @TableField(value = "update_user")
     @ApiModelProperty(value = "修改人")
+    @TableField(fill = FieldFill.INSERT_UPDATE, value = "update_user")
     private Long updateUser;
 }

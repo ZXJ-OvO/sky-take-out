@@ -12,6 +12,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author zxj
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -27,5 +30,5 @@ public class SetmealVO implements Serializable {
     private String image;    //图片
     private LocalDateTime updateTime;    //更新时间
     private String categoryName;    //分类名称
-    private List<SetmealDishEntity> setmealDishEntities = new ArrayList<>();    //套餐和菜品的关联关系
+    private List<SetmealDishEntity> setmealDishes = new ArrayList<>();    //套餐和菜品的关联关系
 }

@@ -1,32 +1,40 @@
 package com.sky.service.impl;
 
+import cn.hutool.core.util.DesensitizedUtil;
+import cn.hutool.core.util.IdcardUtil;
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.crypto.digest.BCrypt;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.sky.constant.JwtClaimsConstant;
-import com.sky.constant.MessageConstant;
-import com.sky.constant.RedisConstant;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sky.constant.*;
+import com.sky.context.BaseContext;
+import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.dto.PasswordEditDTO;
 import com.sky.entity.EmployeeEntity;
-import com.sky.exception.AccountNotFoundException;
-import com.sky.exception.LoginFailedException;
-import com.sky.exception.PasswordErrorException;
+import com.sky.exception.*;
 import com.sky.mapper.EmployeeMapper;
 import com.sky.properties.JwtProperties;
+import com.sky.result.PageBean;
 import com.sky.service.EmployeeService;
+import com.sky.utils.IpUtil;
 import com.sky.utils.JwtUtil;
-import com.sky.utils.PwdHashUtil;
 import com.sky.vo.EmployeeLoginVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -45,10 +53,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Resource
     private JwtProperties jwtProperties;
 
-    @Resource
-    private PwdHashUtil pwdHashUtil;
-
-
     /**
      * 员工登录
      *
@@ -57,60 +61,49 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @return 员工信息VO
      */
     @Override
+    @Transactional
     public EmployeeLoginVO login(EmployeeLoginDTO employeeLoginDTO, HttpServletRequest httpServletRequest) {
         ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
 
-        // TODO: 2023/8/27 期望：用户密码输入3次，锁定账号一个小时  实际：由于ipv4、6的缘故，无法合并统计，因此试错次数是2的倍数
-        // 思路：同ip下失败3次直接禁止该ip的登录操作1小时，即锁定账号的操作和IP绑定而不是和账号绑定，防止恶意试错误封他人账号
-        // 如果客户端采用了代理ip，直接放行，因为代理服务商提供的ip数量有限，并且下方的工具类中已经尽可能的考虑了代理ip的问题
-
         // 1、只要redis中有该ip的key，并且value的值为3，就说明该ip已经被锁定了，直接抛出异常，不用继续往后走
-        String clientIP = ServletUtil.getClientIP(httpServletRequest);
+        String ip = IpUtil.getIpAddress(httpServletRequest);
         String identifier;
-        if (clientIP.contains(":")) {
-            identifier = "IPv6-" + clientIP;
+        if (ip.contains(":")) {
+            identifier = "IPv6-" + ip;
         } else {
-            identifier = "IPv4-" + clientIP;
+            identifier = "IPv4-" + ip;
         }
         String wrongTime = ops.get(identifier);
         if (wrongTime != null && Integer.parseInt(wrongTime) >= 3) {
             throw new LoginFailedException(MessageConstant.ACCOUNT_LOCKED);
         }
 
-        // 2、ip不存在或者ip的value值不为3，校验参数
-        String username = employeeLoginDTO.getUsername();
-        String password = employeeLoginDTO.getPassword();
-        if (username == null || username.isEmpty()) {
-            throw new LoginFailedException(MessageConstant.NULL_USERNAME_ERROR);
-        }
-        if (password == null || password.isEmpty()) {
-            throw new LoginFailedException(MessageConstant.NULL_PASSWORD_ERROR);
-        }
-
-        // 3、校验账号
+        // 2、校验账号
         QueryWrapper<EmployeeEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username", username);
+        queryWrapper.eq("username", employeeLoginDTO.getUsername());
         EmployeeEntity employeeEntity = employeeMapper.selectOne(queryWrapper);
         if (employeeEntity == null) {
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
+        if (employeeEntity.getStatus().equals(StatusConstant.DISABLE)) {
+            throw new AccountDisabledException(MessageConstant.ACCOUNT_DISABLED);
+        }
 
-        // 4、校验密码
-        String salt = pwdHashUtil.generateSalt();
-        String dtoPwd = pwdHashUtil.hashPassword(password, salt);
-        // 表中password的原字段是varchar，长度为64，已修改为128
+        // 3、校验密码
+        String dtoPwd = employeeLoginDTO.getPassword();
         String dbPwd = employeeEntity.getPassword();
-        if (!dbPwd.equals(dtoPwd)) {
-            // 5、密码错误，redis中的value值+2，如果value值大于3，就设置该ip的key的过期时间为30分钟
+
+        if (!BCrypt.checkpw(dtoPwd, dbPwd)) {
+            // 4、密码错误，redis中的value值+1，如果value值大于3，就设置该ip的key的过期时间为30分钟
             if (wrongTime == null) {
-                ops.set(identifier, "1");
-                stringRedisTemplate.expire(identifier, 30, TimeUnit.MINUTES);
-            } else if (Integer.parseInt(wrongTime) <= 2) {
-                ops.increment(identifier);
-                ops.increment(identifier);
-                stringRedisTemplate.expire(identifier, 30, TimeUnit.MINUTES);
+                ops.set(identifier, "1", 1, TimeUnit.MINUTES);
             } else {
-                stringRedisTemplate.expire(identifier, 30, TimeUnit.MINUTES);
+                // 5、通过设置偏移量而不是从新设置时间，保证了时间的连续性
+                ops.set(identifier, String.valueOf(Integer.parseInt(wrongTime) + 1), 0);
+                if (Integer.parseInt(Objects.requireNonNull(ops.get(identifier))) > 2) {
+                    // 此时应该从redis拿到新的value值，而不是直接使用wrongTime
+                    ops.set(identifier, "1", 30, TimeUnit.MINUTES);
+                }
             }
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
         }
@@ -123,9 +116,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         String token = JwtUtil.createJWT(jwtProperties.getAdminSecretKey(), jwtProperties.getAdminTtl(), claims);
 
         // 7、校验通过，给VO封装数据
-        EmployeeLoginVO employeeLoginVO = new EmployeeLoginVO().builder()
+        EmployeeLoginVO employeeLoginVO = EmployeeLoginVO.builder()
                 .id(employeeEntity.getId())
-                .userName(username)
+                .userName(employeeEntity.getUsername())
                 .name(employeeEntity.getName())
                 .token(token)
                 .build();
@@ -140,5 +133,183 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 9、返回员工信息VO
         return employeeLoginVO;
     }
-}
 
+    /**
+     * 新增员工
+     *
+     * @param employeeDTO 员工信息DTO
+     */
+    @Override
+    @Transactional
+    public void insert(EmployeeDTO employeeDTO) {
+
+        // 1、校验用户名的唯一性，字段校验交给validator
+        QueryWrapper<EmployeeEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", employeeDTO.getUsername());
+        EmployeeEntity dbEntity = employeeMapper.selectOne(queryWrapper);
+        if (dbEntity != null) {
+            throw new DuplicateFieldException(MessageConstant.DUPLICATE_USERNAME);
+        }
+
+        // 2、Hutool身份校验工具类校验身份证
+        String idNumber = employeeDTO.getIdNumber();
+        if (!IdcardUtil.isValidCard(idNumber)) {
+            throw new InvalidFieldException("本系统仅支持中国大陆18位、15位和港澳台10位身份证号");
+        }
+
+        // 3、身份证信息脱敏
+        String idCardNum = DesensitizedUtil.idCardNum(idNumber, 6, 4);
+        employeeDTO.setIdNumber(idCardNum);
+
+        // 4、对象属性拷贝 DTO -> Entity
+        EmployeeEntity employeeEntity = new EmployeeEntity();
+        BeanUtils.copyProperties(employeeDTO, employeeEntity);
+
+        // 5、通过本地线程工具类获取当前登录用户的id，交给MyMetaObjectHandler处理
+
+        // 6、密码加密
+        String salt = BCrypt.gensalt();
+        String password = BCrypt.hashpw(PasswordConstant.DEFAULT_PASSWORD, salt);
+
+        // 7、设置默认值，createUser、updateUser、createTime、updateTime交给MyMetaObjectHandler处理
+        employeeEntity.setPassword(password);
+        employeeEntity.setStatus(1);
+
+        // 8、插入数据库
+        employeeMapper.insert(employeeEntity);
+    }
+
+    /**
+     * 员工分页查询
+     *
+     * @param employeePageQueryDTO 员工分页查询DTO
+     * @return 员工分页数据
+     */
+    @Override
+    public PageBean pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
+
+        // 1、获取分页查询条件
+        String name = employeePageQueryDTO.getName();
+        int pageSize = employeePageQueryDTO.getPageSize();
+        int page = employeePageQueryDTO.getPage();
+
+        // 2、构建查询条件
+        QueryWrapper<EmployeeEntity> queryWrapper = new QueryWrapper<>();
+        if (name != null && !name.isEmpty()) {
+            queryWrapper.like("name", name);
+        }
+        queryWrapper.orderByDesc("update_time");
+
+        // 3、分页查询
+        Page<EmployeeEntity> pageWrapper = new Page<>(page, pageSize);
+        Page<EmployeeEntity> pageData = employeeMapper.selectPage(pageWrapper, queryWrapper);
+        List<EmployeeEntity> list = pageData.getRecords();
+
+        // 4、查询总记录数
+        Long total = employeeMapper.selectCount(queryWrapper);
+
+        // 5、封装返回分页查询结果
+        return PageBean.builder()
+                .total(total)
+                .records(list)
+                .build();
+    }
+
+    /**
+     * 根据id查询员工信息
+     *
+     * @param id 员工id not null
+     * @return 员工信息
+     */
+    @Override
+    public EmployeeEntity selectById(Long id) {
+        if (id == null) {
+            throw new InvalidFieldException("id不能为空");
+        }
+        EmployeeEntity employeeEntity = employeeMapper.selectById(id);
+        if (employeeEntity == null) {
+            throw new AccountNotFoundException("id为" + id + "的员工不存在");
+        }
+        return employeeEntity;
+    }
+
+    /**
+     * 更新员工信息
+     *
+     * @param employeeDTO 员工信息DTO
+     */
+    @Override
+    @Transactional
+    public void update(EmployeeDTO employeeDTO) {
+        // 1. 参数校验交给validator
+        EmployeeEntity employeeEntity = EmployeeEntity.builder().build();
+
+        // 2. 对象属性拷贝 DTO -> Entity
+        BeanUtils.copyProperties(employeeDTO, employeeEntity);
+
+        // 3. 更新数据库
+        employeeMapper.updateById(employeeEntity);
+    }
+
+    /**
+     * 更新员工状态
+     *
+     * @param status 0：禁用 1：启用
+     * @param id     员工id
+     */
+    @Override
+    @Transactional
+    public void updateStatus(Integer status, Long id) {
+        // 1、因为validator只用来校验DTO，而这里直接交给entity，所以这里必须手动校验，校验在controller层完成
+        EmployeeEntity employeeEntity = new EmployeeEntity();
+        employeeEntity.setId(id);
+        employeeEntity.setStatus(status);
+
+        // 2、从本地线程中拿到id，设置更新人，更新数据库 交给MyMetaObjectHandler处理
+        employeeMapper.updateById(employeeEntity);
+    }
+
+    /**
+     * 修改密码
+     *
+     * @param passwordEditDTO 密码修改DTO
+     */
+    @Override
+    @Transactional
+    public void updatePassword(PasswordEditDTO passwordEditDTO) {
+
+        // 1、从本地线程中拿到id
+        String oldPassword = passwordEditDTO.getOldPassword();
+        String newPassword = passwordEditDTO.getNewPassword();
+        Long id = BaseContext.getCurrentId();
+
+        // 1、id对应的员工是否存在
+        EmployeeEntity employeeEntity = employeeMapper.selectById(id);
+        if (employeeEntity == null) {
+            throw new AccountNotFoundException("id为" + id + "的员工不存在");
+        }
+
+        // 2、原密码是否正确
+        String dbPwd = employeeEntity.getPassword();
+        if (!BCrypt.checkpw(oldPassword, dbPwd)) {
+            throw new PasswordErrorException("原密码错误");
+        }
+
+        // 3、新密码是否与原密码相同
+        if (oldPassword.equals(newPassword)) {
+            throw new PasswordErrorException("新密码不能与原密码相同");
+        }
+
+        // 4、新密码加密
+        String salt = BCrypt.gensalt();
+        String newPwd = BCrypt.hashpw(newPassword, salt);
+
+        // 4、更新数据库
+        EmployeeEntity updateEntity = EmployeeEntity.builder()
+                .id(id)
+                .password(newPwd)
+                .build();
+
+        employeeMapper.updateById(updateEntity);
+    }
+}

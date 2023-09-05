@@ -3,4 +3,22 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.DishMapper">
 
+    <select id="pageQuery" resultType="com.sky.vo.DishVO">
+        select dish.*,
+        category.name categoryName
+        from dish
+        left join category on dish.category_id = category.id
+        <where>
+            <if test="name!= null">
+                and dish.name like concat('%',#{name},'%')
+            </if>
+            <if test="categoryId != null">
+                and dish.category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                and dish.status = #{status}
+            </if>
+        </where>
+        order by dish.create_time desc
+    </select>
 </mapper>

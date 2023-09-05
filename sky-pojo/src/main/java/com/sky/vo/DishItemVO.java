@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+/**
+ * @author zxj
+ */
 @Data
 @Builder
 @NoArgsConstructor

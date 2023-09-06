@@ -98,4 +98,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 .eq(ShoppingCartEntity::getUserId, BaseContext.getCurrentId())
                 .list();
     }
+
+    @Override
+    public void cleanShoppingCart() {
+        shoppingCartMapper.delete(new LambdaQueryWrapper<>(ShoppingCartEntity.class).eq(ShoppingCartEntity::getUserId, BaseContext.getCurrentId()));
+    }
 }

@@ -58,8 +58,19 @@ public interface DishService {
      */
     void update(DishDTO dishDTO);
 
-
+    /**
+     * 根据菜品分类id查询菜品
+     *
+     * @param categoryId 菜品分类id
+     * @return 菜品列表
+     */
     List<DishEntity> listByCategoryId(Long categoryId);
 
+    /**
+     * 根据菜品分类id查询菜品
+     *
+     * @param categoryId 菜品/套餐分类id
+     * @return 根据分类id查出来的分类下的所有菜品/套餐数据
+     */
     List<DishVO> selectByCategoryId(Long categoryId);
 }

@@ -24,6 +24,8 @@ import com.sky.service.DishService;
 import com.sky.vo.DishVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,8 +50,12 @@ public class DishServiceImpl implements DishService {
 
     @Resource
     private SetmealDishMapper setmealDishMapper;
+
     @Resource
     private SetmealMapper setmealMapper;
+
+    @Resource
+    private RedisTemplate redisTemplate;
 
     /**
      * 菜品状态
@@ -223,6 +229,12 @@ public class DishServiceImpl implements DishService {
         });
     }
 
+    /**
+     * （管理端）根据菜品分类id查询菜品
+     *
+     * @param categoryId 菜品分类id
+     * @return 根据分类id查出来的分类下的所有菜品/套餐数据
+     */
     @Override
     public List<DishEntity> listByCategoryId(Long categoryId) {
         return new LambdaQueryChainWrapper<>(dishMapper)
@@ -230,13 +242,27 @@ public class DishServiceImpl implements DishService {
                 .list();
     }
 
+    /**
+     * （用户端）根据菜品分类id查询菜品
+     *
+     * @param categoryId 菜品/套餐分类id
+     * @return 根据分类id查出来的分类下的所有菜品/套餐数据
+     */
     @Override
+    @Cacheable(cacheNames = "setmeal:list", key = "#categoryId", unless = "#result.size() <= 0")
     public List<DishVO> selectByCategoryId(Long categoryId) {
+
+        // 查数据库
         LambdaQueryWrapper<DishEntity> lambdaQueryWrapper = new LambdaQueryWrapper<DishEntity>()
                 .eq(DishEntity::getCategoryId, categoryId)
                 .eq(DishEntity::getStatus, 1);
         List<DishEntity> entities = dishMapper.selectList(lambdaQueryWrapper);
-        ArrayList<DishVO> dishVos = new ArrayList<>();
+
+        if (entities == null || entities.isEmpty()) {
+            return null;
+        }
+
+        List<DishVO> dishVos = new ArrayList<>();
         for (DishEntity entity : entities) {
             DishVO dishVO = new DishVO();
             BeanUtils.copyProperties(entity, dishVO);
@@ -251,6 +277,4 @@ public class DishServiceImpl implements DishService {
 
         return dishVos;
     }
-
-
 }

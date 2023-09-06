@@ -120,6 +120,12 @@ public class DishController {
         return Result.success();
     }
 
+    /**
+     * 根据菜品分类id查询菜品
+     *
+     * @param categoryId 菜品分类id
+     * @return {@link Result<List<DishEntity>>}
+     */
     @GetMapping("/list")
     @PreAuthorize("admin:dish:list")
     public Result<List<DishEntity>> list(@RequestParam @NotNull(message = "分类id不能为空") Long categoryId) {

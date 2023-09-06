@@ -20,4 +20,6 @@ public interface AddressBookService {
     AddressBookEntity getAddressBookById(Long id);
 
     void updateAddressBook(AddressBookEntity addressBookEntity);
+
+    void deleteAddressBookById(Long id);
 }

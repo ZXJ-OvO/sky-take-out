@@ -23,35 +23,41 @@ public class AddressBookController {
     private AddressBookService addressBookService;
 
     @PostMapping
-    public Result<String> addAddressBook(@RequestBody AddressBookEntity addressBookEntity) {
+    public Result<String> insert(@RequestBody AddressBookEntity addressBookEntity) {
         addressBookService.insert(addressBookEntity);
         return Result.success();
     }
 
     @GetMapping("/list")
-    public Result<List<AddressBookEntity>> selectListAddressBook() {
+    public Result<List<AddressBookEntity>> getList() {
         return Result.success(addressBookService.selectList());
     }
 
     @GetMapping("/default")
-    public Result<AddressBookEntity> getDefaultAddressBook() {
+    public Result<AddressBookEntity> getDefault() {
         return Result.success(addressBookService.selectDefaultAddressBook());
     }
 
     @PutMapping("/default")
-    public Result<String> updateDefaultAddressBook(@RequestBody AddressBookEntity addressBookEntity) {
+    public Result<String> putDefault(@RequestBody AddressBookEntity addressBookEntity) {
         addressBookService.updateDefaultAddressBook(addressBookEntity);
         return Result.success();
     }
 
     @GetMapping("/{id}")
-    public Result<AddressBookEntity> getAddressBookById(@PathVariable Long id) {
+    public Result<AddressBookEntity> getById(@PathVariable Long id) {
         return Result.success(addressBookService.getAddressBookById(id));
     }
 
     @PutMapping
-    public Result<String> updateAddressBook(@RequestBody AddressBookEntity addressBookEntity) {
+    public Result<String> update(@RequestBody AddressBookEntity addressBookEntity) {
         addressBookService.updateAddressBook(addressBookEntity);
+        return Result.success();
+    }
+
+    @DeleteMapping
+    public Result<String> delById(@RequestParam Long id) {
+        addressBookService.deleteAddressBookById(id);
         return Result.success();
     }
 }

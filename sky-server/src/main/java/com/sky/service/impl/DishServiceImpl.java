@@ -34,6 +34,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author zxj
@@ -56,6 +57,16 @@ public class DishServiceImpl implements DishService {
 
     @Resource
     private RedisTemplate redisTemplate;
+
+    /**
+     * 清理缓存数据
+     *
+     * @param pattern
+     */
+    private void cleanCache(String pattern) {
+        Set keys = redisTemplate.keys(pattern);
+        redisTemplate.delete(keys);
+    }
 
     /**
      * 菜品状态
@@ -82,6 +93,9 @@ public class DishServiceImpl implements DishService {
                 setmealMapper.updateById(setmealEntity);
             }
         }
+
+        //将所有的菜品缓存数据清理掉，所有以dish_开头的key
+        cleanCache("dish_*");
 
     }
 
@@ -148,6 +162,11 @@ public class DishServiceImpl implements DishService {
                 dishFlavorMapper.insert(dishFlavor);
             });
         }
+
+        //清理缓存数据
+        String key = "dish_" + dishDTO.getCategoryId();
+        cleanCache(key);
+
     }
 
     /**
@@ -227,6 +246,9 @@ public class DishServiceImpl implements DishService {
             setmealDishEntity.setPrice(price);
             setmealDishMapper.updateById(setmealDishEntity);
         });
+
+        //将所有的菜品缓存数据清理掉，所有以dish_开头的key
+        cleanCache("dish_*");
     }
 
     /**

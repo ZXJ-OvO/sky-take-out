@@ -1,11 +1,9 @@
 package com.sky.controller.user;
 
-import com.sky.entity.SetmealDishEntity;
 import com.sky.entity.SetmealEntity;
 import com.sky.result.Result;
 import com.sky.service.SetmealService;
 import com.sky.vo.DishItemVO;
-import com.sky.vo.SetmealVO;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +15,9 @@ import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+/**
+ * @author zxj
+ */
 @RestController("userSetmealController")
 @RequestMapping("/user/setmeal")
 @Api(tags = "C端-套餐浏览接口")

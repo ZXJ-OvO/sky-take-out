@@ -24,6 +24,8 @@ import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,6 +65,7 @@ public class SetmealServiceImpl implements SetmealService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "setmealCache", key = "#setmealDTO.categoryId")
     public void insert(SetmealDTO setmealDTO) {
         // 从setmealDTO中获取菜品集合数据
         List<SetmealDishEntity> setmealDishEntities = setmealDTO.getSetmealDishes();
@@ -71,7 +74,6 @@ public class SetmealServiceImpl implements SetmealService {
         SetmealEntity setmealEntity = new SetmealEntity();
         BeanUtils.copyProperties(setmealDTO, setmealEntity);
 
-
         // 信息过滤
         List<String> wordList = SensitiveWordHelper.findAll(setmealEntity.getDescription(), WordResultHandlers.word());
         log.info("检测到敏感词:{}", wordList);
@@ -79,7 +81,6 @@ public class SetmealServiceImpl implements SetmealService {
         log.info("替换后的描述:{}", replace);
         setmealEntity.setDescription(replace);
         setmealMapper.insert(setmealEntity);
-
 
         // 保存套餐菜品关系信息
         for (SetmealDishEntity setmealDishEntity : setmealDishEntities) {
@@ -94,6 +95,7 @@ public class SetmealServiceImpl implements SetmealService {
     }
 
     @Override
+    @Cacheable(cacheNames = "setmealCache", key = "#categoryId")
     public SetmealVO selectById(Long id) {
         // 根据id查询套餐
         SetmealEntity entity = setmealMapper.selectById(id);
@@ -119,6 +121,7 @@ public class SetmealServiceImpl implements SetmealService {
 
     @Transactional
     @Override
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
     public void update(SetmealDTO setmealDTO) {
         SetmealEntity setmealEntity = new SetmealEntity();
         BeanUtils.copyProperties(setmealDTO, setmealEntity);
@@ -155,6 +158,7 @@ public class SetmealServiceImpl implements SetmealService {
 
     @Transactional
     @Override
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
     public void delete(String ids) {
         String[] idArr = ids.split(",");
         List<String> idList = Arrays.asList(idArr);
@@ -174,6 +178,7 @@ public class SetmealServiceImpl implements SetmealService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
     public void updateStatus(Integer status, Long id) {
 
         if (status == 1) {
@@ -198,19 +203,18 @@ public class SetmealServiceImpl implements SetmealService {
     }
 
     @Override
+    @Cacheable(cacheNames = "setmealCache",key = "#categoryId")
     public List<SetmealEntity> selectByCategoryId(Long categoryId) {
 
         LambdaQueryWrapper<SetmealEntity> lambdaQueryWrapper = new LambdaQueryWrapper<SetmealEntity>()
                 .eq(SetmealEntity::getCategoryId, categoryId)
                 .eq(SetmealEntity::getStatus, 1);
-        List<SetmealEntity> entities = setmealMapper.selectList(lambdaQueryWrapper);
-        return entities;
+        return setmealMapper.selectList(lambdaQueryWrapper);
     }
 
     @Override
     public List<DishItemVO> selectSetmealDishes(Long id) {
-        List<DishItemVO> dishItemVos = setmealDishMapper.selectSetmealIncludeDishes(id);
-        return dishItemVos;
+        return setmealDishMapper.selectSetmealIncludeDishes(id);
     }
 
 }

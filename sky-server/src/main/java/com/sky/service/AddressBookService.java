@@ -2,10 +2,14 @@ package com.sky.service;
 
 import com.sky.entity.AddressBookEntity;
 
+import java.util.List;
+
 /**
  * @author zxj
  */
 public interface AddressBookService {
 
     void insert(AddressBookEntity addressBookEntity);
+
+    List<AddressBookEntity> selectList();
 }

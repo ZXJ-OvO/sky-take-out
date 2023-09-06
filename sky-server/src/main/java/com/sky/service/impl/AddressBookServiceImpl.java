@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.sky.context.BaseContext;
 import com.sky.entity.AddressBookEntity;
 import com.sky.mapper.AddressBookMapper;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author zxj
@@ -24,5 +26,10 @@ public class AddressBookServiceImpl implements AddressBookService {
     public void insert(AddressBookEntity addressBookEntity) {
         addressBookEntity.setUserId(BaseContext.getCurrentId());
         addressBookMapper.insert(addressBookEntity);
+    }
+
+    @Override
+    public List<AddressBookEntity> selectList() {
+        return new LambdaQueryChainWrapper<>(AddressBookEntity.class).eq(AddressBookEntity::getUserId, BaseContext.getCurrentId()).list();
     }
 }

@@ -12,4 +12,7 @@ public interface AddressBookService {
     void insert(AddressBookEntity addressBookEntity);
 
     List<AddressBookEntity> selectList();
+
+    AddressBookEntity selectDefaultAddressBook();
+
 }

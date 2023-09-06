@@ -26,16 +26,16 @@ public class AddressBookController {
     }
 
     @GetMapping("/list")
-    public Result<List<AddressBookEntity>> addAddressBook() {
-
+    public Result<List<AddressBookEntity>> selectListAddressBook() {
         return Result.success(addressBookService.selectList());
     }
 
-//    @PostMapping
-//    public Result<String> addAddressBook() {
-//
-//    }
-//
+    @GetMapping("/default")
+    public Result<AddressBookEntity> getDefaultAddressBook() {
+        return Result.success(addressBookService.selectDefaultAddressBook());
+    }
+
+
 //    @PostMapping
 //    public Result<String> addAddressBook() {
 //

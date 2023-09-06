@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.List;
 
+/**
+ * @author zxj
+ */
 @RestController
 @RequestMapping("/user/addressBook")
 @Api(tags = "C端-地址簿接口")
@@ -35,24 +38,9 @@ public class AddressBookController {
         return Result.success(addressBookService.selectDefaultAddressBook());
     }
 
-
-//    @PostMapping
-//    public Result<String> addAddressBook() {
-//
-//    }
-//
-//    @PostMapping
-//    public Result<String> addAddressBook() {
-//
-//    }
-//
-//    @PostMapping
-//    public Result<String> addAddressBook() {
-//
-//    }
-//
-//    @PostMapping
-//    public Result<String> addAddressBook() {
-//
-//    }
+    @PutMapping("/default")
+    public Result<String> updateDefaultAddressBook(@RequestBody AddressBookEntity addressBookEntity) {
+        addressBookService.updateDefaultAddressBook(addressBookEntity);
+        return Result.success();
+    }
 }

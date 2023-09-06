@@ -15,4 +15,5 @@ public interface AddressBookService {
 
     AddressBookEntity selectDefaultAddressBook();
 
+    void updateDefaultAddressBook(AddressBookEntity addressBookEntity);
 }

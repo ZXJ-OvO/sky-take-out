@@ -43,4 +43,9 @@ public class AddressBookController {
         addressBookService.updateDefaultAddressBook(addressBookEntity);
         return Result.success();
     }
+
+    @GetMapping("/{id}")
+    public Result<AddressBookEntity> getAddressBookById(@PathVariable Long id) {
+        return Result.success(addressBookService.getAddressBookById(id));
+    }
 }

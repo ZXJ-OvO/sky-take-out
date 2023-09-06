@@ -50,4 +50,9 @@ public class AddressBookServiceImpl implements AddressBookService {
         }
 
     }
+
+    @Override
+    public AddressBookEntity getAddressBookById(Long id) {
+        return addressBookMapper.selectById(id);
+    }
 }

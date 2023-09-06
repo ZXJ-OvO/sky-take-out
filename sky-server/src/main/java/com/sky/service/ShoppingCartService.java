@@ -16,4 +16,6 @@ public interface ShoppingCartService {
 
     void cleanShoppingCart();
 
+    void subtract(ShoppingCartDTO shoppingCartDTO);
+
 }

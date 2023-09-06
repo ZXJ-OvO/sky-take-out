@@ -48,4 +48,10 @@ public class AddressBookController {
     public Result<AddressBookEntity> getAddressBookById(@PathVariable Long id) {
         return Result.success(addressBookService.getAddressBookById(id));
     }
+
+    @PutMapping
+    public Result<String> updateAddressBook(@RequestBody AddressBookEntity addressBookEntity) {
+        addressBookService.updateAddressBook(addressBookEntity);
+        return Result.success();
+    }
 }

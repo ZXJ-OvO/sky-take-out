@@ -7,6 +7,7 @@ import com.sky.mapper.AddressBookMapper;
 import com.sky.service.AddressBookService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -38,12 +39,23 @@ public class AddressBookServiceImpl implements AddressBookService {
         return new LambdaQueryChainWrapper<>(AddressBookEntity.class).eq(AddressBookEntity::getUserId, BaseContext.getCurrentId()).one();
     }
 
+    @Transactional
     @Override
     public void updateDefaultAddressBook(AddressBookEntity addressBookEntity) {
+        List<AddressBookEntity> allAddressList = new LambdaQueryChainWrapper<>(AddressBookEntity.class)
+                .eq(AddressBookEntity::getUserId, BaseContext.getCurrentId())
+                .list();
+
+        for (AddressBookEntity bookEntity : allAddressList) {
+            bookEntity.setIsDefault(0);
+            addressBookMapper.updateById(bookEntity);
+        }
+
         AddressBookEntity entity = new LambdaQueryChainWrapper<>(AddressBookEntity.class)
                 .eq(AddressBookEntity::getUserId, BaseContext.getCurrentId())
                 .eq(AddressBookEntity::getId, addressBookEntity.getId())
                 .one();
+
         if (entity != null) {
             entity.setIsDefault(1);
             addressBookMapper.updateById(entity);

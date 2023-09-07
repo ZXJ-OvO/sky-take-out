@@ -29,6 +29,8 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         this.setFieldValByName("updateTime", LocalDateTime.now(), metaObject);
         this.setFieldValByName("createUser", BaseContext.getCurrentId(), metaObject);
         this.setFieldValByName("updateUser", BaseContext.getCurrentId(), metaObject);
+
+        this.setFieldValByName("orderTime", LocalDateTime.now(), metaObject);
     }
 
     /**

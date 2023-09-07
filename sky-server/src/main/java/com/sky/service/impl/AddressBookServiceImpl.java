@@ -36,7 +36,10 @@ public class AddressBookServiceImpl implements AddressBookService {
 
     @Override
     public AddressBookEntity selectDefaultAddressBook() {
-        return new LambdaQueryChainWrapper<>(AddressBookEntity.class).eq(AddressBookEntity::getUserId, BaseContext.getCurrentId()).one();
+        return new LambdaQueryChainWrapper<>(AddressBookEntity.class)
+                .eq(AddressBookEntity::getUserId, BaseContext.getCurrentId())
+                .eq(AddressBookEntity::getIsDefault, 1)
+                .one();
     }
 
     @Transactional

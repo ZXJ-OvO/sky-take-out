@@ -70,4 +70,19 @@ public class OrderController {
         orderService.onceAgainThisOrder(id);
         return Result.success();
     }
+
+    @PutMapping("/cancel/{id}")
+    @ApiOperation("取消订单")
+    public Result<String> cancelOrder(@PathVariable Long id) {
+        orderService.cancelOrderById(id);
+        return Result.success();
+    }
+
+
+    @GetMapping("/reminder/{id}")
+    @ApiOperation("催单")
+    public Result<String> urgedOrder(@PathVariable Long id) {
+        orderService.urgedOrderById(id);
+        return Result.success();
+    }
 }

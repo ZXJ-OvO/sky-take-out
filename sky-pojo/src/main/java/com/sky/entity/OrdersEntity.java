@@ -28,6 +28,7 @@ public class OrdersEntity implements Serializable {
     public static final Integer DELIVERY_IN_PROGRESS = 4;
     public static final Integer COMPLETED = 5;
     public static final Integer CANCELLED = 6;
+    public static final Integer ORDER_REFUND = 7;
 
     //支付状态 0未支付 1已支付 2退款
     public static final Integer UN_PAID = 0;

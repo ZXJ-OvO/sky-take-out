@@ -36,4 +36,8 @@ public interface OrderService {
     OrderVO queryOrderDetail(Long id);
 
     void onceAgainThisOrder(Long id);
+
+    void cancelOrderById(Long id);
+
+    void urgedOrderById(Long id);
 }

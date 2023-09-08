@@ -20,6 +20,7 @@ import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -215,5 +216,40 @@ public class OrderServiceImpl implements OrderService {
             shoppingCartEntity.setUserId(BaseContext.getCurrentId());
             shoppingCartMapper.insert(shoppingCartEntity);
         });
+    }
+
+    @SneakyThrows
+    @Transactional
+    @Override
+    public void cancelOrderById(Long id) {
+        //  1. 校验订单是否存在
+        OrdersEntity ordersEntity = orderMapper.selectById(id);
+        if (ordersEntity == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //  2. 校验订单状态：仅待付款和待接单状态的订单可以直接取消，其他状态的不能取消
+        if (!OrdersEntity.PENDING_PAYMENT.equals(ordersEntity.getStatus())
+                && !OrdersEntity.TO_BE_CONFIRMED.equals(ordersEntity.getStatus())) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        //  3. 如果订单状态为待接单且支付状态为已支付的情况下，还需要进行退款操作，需要做如下操作：
+
+        //  - 调用weChatUtil.refund方法退款
+        // weChatPayUtil.refund(ordersEntity.getNumber(), "商户退款单号", ordersEntity.getAmount(), ordersEntity.getAmount());
+
+        //  - 将支付状态改为退款
+        ordersEntity.setPayStatus(OrdersEntity.REFUND);
+
+        //  4. 最后取消订单，其实就是更新订单状态为已取消（可以将取消原因设置为：用户取消）
+        ordersEntity.setStatus(OrdersEntity.CANCELLED);
+
+        orderMapper.updateById(ordersEntity);
+    }
+
+    @Override
+    public void urgedOrderById(Long id) {
+
     }
 }

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapp
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersConfirmDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
@@ -302,6 +303,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderVO getDetailsById(Long id) {
         return queryOrderDetail(id);
+    }
+
+    @Override
+    public void confirmOrder(OrdersConfirmDTO ordersConfirmDTO) {
+        orderMapper.updateById(OrdersEntity.builder().id(ordersConfirmDTO.getId()).status(CONFIRMED).build());
     }
 
 }

@@ -6,6 +6,7 @@ import com.sky.dto.OrdersSubmitDTO;
 import com.sky.result.PageBean;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 
 /**
  * @author zxj
@@ -31,4 +32,6 @@ public interface OrderService {
 
 
     PageBean pageQueryHistoryOrders(OrdersPageQueryDTO ordersPageQueryDTO);
+
+    OrderVO queryOrderDetail(Long id);
 }

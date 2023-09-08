@@ -1,6 +1,5 @@
 package com.sky.controller.user;
 
-import cn.hutool.db.Page;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
@@ -16,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * @author zxj
@@ -56,7 +54,13 @@ public class OrderController {
     @ApiOperation("历史订单查询")
     public Result<PageBean> historyQuery(OrdersPageQueryDTO ordersPageQueryDTO) {
         PageBean pageBean = orderService.pageQueryHistoryOrders(ordersPageQueryDTO);
-        log.info("历史订单查询结果：{}", pageBean);
         return Result.success(pageBean);
+    }
+
+    @GetMapping("/orderDetail/{id}")
+    @ApiOperation("历史订单查询")
+    public Result<OrderVO> historyQuery(@PathVariable Long id) {
+        OrderVO orderVO = orderService.queryOrderDetail(id);
+        return Result.success(orderVO);
     }
 }

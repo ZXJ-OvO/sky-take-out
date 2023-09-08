@@ -1,6 +1,7 @@
 package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sky.constant.MessageConstant;
@@ -185,5 +186,22 @@ public class OrderServiceImpl implements OrderService {
 
         long count = records.size();
         return PageBean.builder().total(count).records(records).build();
+    }
+
+    @Override
+    public OrderVO queryOrderDetail(Long id) {
+        OrdersEntity orderEntity = new LambdaQueryChainWrapper<>(OrdersEntity.class)
+                .eq(OrdersEntity::getId, id)
+                .one();
+
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(orderEntity, orderVO);
+        orderVO.setOrderDetailList(
+                orderDetailMapper.selectList(
+                        new LambdaQueryWrapper<OrderDetailEntity>()
+                                .eq(OrderDetailEntity::getOrderId, orderEntity.getId()))
+        );
+
+        return orderVO;
     }
 }

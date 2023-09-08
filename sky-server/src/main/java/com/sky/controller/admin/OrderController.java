@@ -1,14 +1,14 @@
 package com.sky.controller.admin;
 
-import com.sky.dto.OrdersSubmitDTO;
+import com.sky.dto.OrdersPageQueryDTO;
+import com.sky.result.PageBean;
 import com.sky.result.Result;
 import com.sky.service.OrderService;
-import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderStatisticsVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,11 +26,17 @@ public class OrderController {
     @Resource
     private OrderService orderService;
 
-    @PostMapping("/submit")
-    @ApiOperation("用户下单")
-    public Result<OrderSubmitVO> submit(@RequestBody OrdersSubmitDTO ordersSubmitDTO) {
-        OrderSubmitVO orderSubmitVO = orderService.submitOrder(ordersSubmitDTO);
-        return Result.success(orderSubmitVO);
+    @GetMapping("/conditionSearch")
+    @ApiOperation("订单搜索")
+    public Result<PageBean> conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+        PageBean pageBean = orderService.adminConditionSearch(ordersPageQueryDTO);
+        return Result.success(pageBean);
     }
 
+    @GetMapping("/statistics")
+    @ApiOperation("各个状态的订单数量统计")
+    public Result<OrderStatisticsVO> statistics() {
+        OrderStatisticsVO orderStatisticsVO = orderService.statisticsEachItemNumber();
+        return Result.success(orderStatisticsVO);
+    }
 }

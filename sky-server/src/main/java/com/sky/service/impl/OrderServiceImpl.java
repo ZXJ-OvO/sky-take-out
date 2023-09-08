@@ -18,6 +18,7 @@ import com.sky.result.PageBean;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import lombok.SneakyThrows;
@@ -32,8 +33,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.baomidou.mybatisplus.extension.toolkit.Db.saveBatch;
+import static com.sky.entity.OrdersEntity.*;
 
 /**
  * 订单
@@ -154,7 +157,7 @@ public class OrderServiceImpl implements OrderService {
         // 根据订单id更新订单的状态、支付方式、支付状态、结账时间
         OrdersEntity orders = OrdersEntity.builder()
                 .id(ordersDb.getId())
-                .status(OrdersEntity.TO_BE_CONFIRMED)
+                .status(TO_BE_CONFIRMED)
                 .payStatus(OrdersEntity.PAID)
                 .checkoutTime(LocalDateTime.now())
                 .build();
@@ -185,7 +188,7 @@ public class OrderServiceImpl implements OrderService {
             records.add(orderVO);
         });
 
-        long count = records.size();
+        long count = records.size();  // FIXME: 2023/9/8 怀疑有问题
         return PageBean.builder().total(count).records(records).build();
     }
 
@@ -230,7 +233,7 @@ public class OrderServiceImpl implements OrderService {
 
         //  2. 校验订单状态：仅待付款和待接单状态的订单可以直接取消，其他状态的不能取消
         if (!OrdersEntity.PENDING_PAYMENT.equals(ordersEntity.getStatus())
-                && !OrdersEntity.TO_BE_CONFIRMED.equals(ordersEntity.getStatus())) {
+                && !TO_BE_CONFIRMED.equals(ordersEntity.getStatus())) {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
 
@@ -250,6 +253,52 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void urgedOrderById(Long id) {
-
+        // TODO: 2023/9/8 催单
     }
+
+    @Override
+    public PageBean adminConditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+        Integer status = ordersPageQueryDTO.getStatus();
+        String phone = ordersPageQueryDTO.getPhone();
+        String number = ordersPageQueryDTO.getNumber();
+        LocalDateTime beginTime = ordersPageQueryDTO.getBeginTime();
+        LocalDateTime endTime = ordersPageQueryDTO.getEndTime();
+        // 通过对前台页面的测试发现，beginTime和endTime必须同时存在或者同时不被携带，因此做并且判断
+        Page<OrdersEntity> page = new LambdaQueryChainWrapper<>(OrdersEntity.class)
+                .eq(status != null, OrdersEntity::getStatus, status)
+                .eq(phone != null, OrdersEntity::getPhone, phone)
+                .eq(number != null, OrdersEntity::getNumber, number)
+                .between(beginTime != null && endTime != null, OrdersEntity::getOrderTime, beginTime, endTime)
+                .page(new Page<>(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize()));
+
+        List<OrdersEntity> records = page.getRecords();
+        long total = page.getTotal();
+
+        List<OrderVO> orderVOs = new ArrayList<>();
+        records.stream().forEach(orderEntity -> {
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(orderEntity, orderVO);
+
+            List<OrderDetailEntity> orderDetailEntities = new LambdaQueryChainWrapper<>(OrderDetailEntity.class)
+                    .eq(OrderDetailEntity::getOrderId, orderEntity.getId())
+                    .list();
+
+            List<String> names = orderDetailEntities.stream()
+                    .map(OrderDetailEntity::getName)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            String orderDishes = String.join(",", names);
+            orderVO.setOrderDishes(orderDishes);
+            orderVOs.add(orderVO);
+        });
+        return PageBean.builder().total(total).records(orderVOs).build();
+    }
+
+    @Override
+    public OrderStatisticsVO statisticsEachItemNumber() {
+        return orderMapper.statistic(new Integer[]{TO_BE_CONFIRMED, CONFIRMED, DELIVERY_IN_PROGRESS});
+    }
+
+
 }

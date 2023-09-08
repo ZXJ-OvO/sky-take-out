@@ -2,6 +2,7 @@ package com.sky.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.sky.entity.OrdersEntity;
+import com.sky.vo.OrderStatisticsVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -25,4 +26,6 @@ public interface OrderMapper extends BaseMapper<OrdersEntity> {
      * @param orders
      */
     void update(OrdersEntity orders);
+
+    OrderStatisticsVO statistic(Integer[] statusArray);
 }

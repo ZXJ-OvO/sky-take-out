@@ -34,4 +34,6 @@ public interface OrderService {
     PageBean pageQueryHistoryOrders(OrdersPageQueryDTO ordersPageQueryDTO);
 
     OrderVO queryOrderDetail(Long id);
+
+    void onceAgainThisOrder(Long id);
 }

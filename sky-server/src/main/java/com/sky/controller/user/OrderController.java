@@ -58,9 +58,16 @@ public class OrderController {
     }
 
     @GetMapping("/orderDetail/{id}")
-    @ApiOperation("历史订单查询")
-    public Result<OrderVO> historyQuery(@PathVariable Long id) {
+    @ApiOperation("历史订单查询详情")
+    public Result<OrderVO> orderDetail(@PathVariable Long id) {
         OrderVO orderVO = orderService.queryOrderDetail(id);
         return Result.success(orderVO);
+    }
+
+    @PostMapping("/repetition/{id}")
+    @ApiOperation("再来一单")
+    public Result<String> onceAgain(@PathVariable Long id) {
+        orderService.onceAgainThisOrder(id);
+        return Result.success();
     }
 }

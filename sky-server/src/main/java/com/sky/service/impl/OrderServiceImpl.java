@@ -204,4 +204,16 @@ public class OrderServiceImpl implements OrderService {
 
         return orderVO;
     }
+
+    @Override
+    public void onceAgainThisOrder(Long id) {
+        queryOrderDetail(id).getOrderDetailList().forEach(orderDetailEntity -> {
+            // 再来一旦的时候，订单明细的每个商品的id都要置空，因为此时拿到了旧数据的id，再次插入会引发主键冲突
+            orderDetailEntity.setId(null);
+            ShoppingCartEntity shoppingCartEntity = new ShoppingCartEntity();
+            BeanUtils.copyProperties(orderDetailEntity, shoppingCartEntity);
+            shoppingCartEntity.setUserId(BaseContext.getCurrentId());
+            shoppingCartMapper.insert(shoppingCartEntity);
+        });
+    }
 }

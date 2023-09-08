@@ -49,4 +49,5 @@ public interface OrderService {
 
     void rejectOrder(OrdersRejectionDTO ordersRejectionDTO);
 
+    void cancelOrder(OrdersCancelDTO ordersCancelDTO);
 }

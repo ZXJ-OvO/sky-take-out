@@ -31,6 +31,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.baomidou.mybatisplus.extension.toolkit.Db.saveBatch;
@@ -313,10 +314,40 @@ public class OrderServiceImpl implements OrderService {
         // 支付完成的订单才会被修改成待接单，拒单只发生在待接单里，因此需要拒单并退款
         // 退款  weChatPayUtil.refund()
         orderMapper.updateById(OrdersEntity.builder()
-                .id(ordersRejectionDTO.getId()).status(CANCELLED)
+                .id(ordersRejectionDTO.getId())
+                .status(CANCELLED)
                 .rejectionReason(ordersRejectionDTO.getRejectionReason())
+                .payStatus(REFUND)
                 .build());
     }
 
+    @Override
+    public void cancelOrder(OrdersCancelDTO ordersCancelDTO) {
+        // 查询支付状态，已支付的先完成退款
+        OrdersEntity ordersEntity = orderMapper.selectById(ordersCancelDTO.getId());
+        if (ordersEntity == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
 
+        if (Objects.equals(ordersEntity.getPayStatus(), PAID)) {
+            // 退款  weChatPayUtil.refund()
+            orderMapper.updateById(OrdersEntity.builder()
+                    .id(ordersEntity.getId())
+                    .cancelReason(ordersCancelDTO.getCancelReason())
+                    .status(CANCELLED)
+                    .payStatus(REFUND)
+                    .build()
+            );
+        } else {
+            // 没有付款的订单
+            orderMapper.updateById(OrdersEntity.builder()
+                    .id(ordersEntity.getId())
+                    .cancelReason(ordersCancelDTO.getCancelReason())
+                    .status(CANCELLED)
+                    .payStatus(UN_PAID)
+                    .build()
+            );
+        }
+
+    }
 }

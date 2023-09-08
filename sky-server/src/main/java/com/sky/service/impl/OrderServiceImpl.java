@@ -357,4 +357,11 @@ public class OrderServiceImpl implements OrderService {
                 .id(id)
                 .status(DELIVERY_IN_PROGRESS).build());
     }
+
+    @Override
+    public void completeOrder(Long id) {
+        orderMapper.updateById(OrdersEntity.builder()
+                .id(id)
+                .status(COMPLETED).build());
+    }
 }

@@ -31,7 +31,6 @@ public interface OrderService {
      */
     void paySuccess(String outTradeNo);
 
-
     PageBean pageQueryHistoryOrders(OrdersPageQueryDTO ordersPageQueryDTO);
 
     OrderVO queryOrderDetail(Long id);
@@ -45,5 +44,7 @@ public interface OrderService {
     PageBean adminConditionSearch(OrdersPageQueryDTO ordersPageQueryDTO);
 
     OrderStatisticsVO statisticsEachItemNumber();
+
+    OrderVO getDetailsById(Long id);
 
 }

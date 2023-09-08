@@ -165,7 +165,6 @@ public class OrderServiceImpl implements OrderService {
         orderMapper.update(orders);
     }
 
-
     @Override
     public PageBean pageQueryHistoryOrders(OrdersPageQueryDTO ordersPageQueryDTO) {
 
@@ -300,5 +299,9 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.statistic(new Integer[]{TO_BE_CONFIRMED, CONFIRMED, DELIVERY_IN_PROGRESS});
     }
 
+    @Override
+    public OrderVO getDetailsById(Long id) {
+        return queryOrderDetail(id);
+    }
 
 }

@@ -5,10 +5,12 @@ import com.sky.result.PageBean;
 import com.sky.result.Result;
 import com.sky.service.OrderService;
 import com.sky.vo.OrderStatisticsVO;
+import com.sky.vo.OrderVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,4 +41,12 @@ public class OrderController {
         OrderStatisticsVO orderStatisticsVO = orderService.statisticsEachItemNumber();
         return Result.success(orderStatisticsVO);
     }
+
+    @GetMapping("/details/{id}")
+    @ApiOperation("管理端查询订单详情")
+    public Result<OrderVO> getDetailsById(@PathVariable Long id) {
+        OrderVO orderVO = orderService.getDetailsById(id);
+        return Result.success(orderVO);
+    }
+
 }

@@ -65,10 +65,16 @@ public class OrderController {
 
 
     @PutMapping("/cancel")
-    @ApiOperation("拒单")
+    @ApiOperation("取消订单")
     public Result<String> cancel(@RequestBody OrdersCancelDTO ordersCancelDTO) {
         orderService.cancelOrder(ordersCancelDTO);
         return Result.success();
     }
 
+    @PutMapping("/delivery/{id}")
+    @ApiOperation("派送订单")
+    public Result<String> delivery(@PathVariable Long id) {
+        orderService.deliveryOrder(id);
+        return Result.success();
+    }
 }

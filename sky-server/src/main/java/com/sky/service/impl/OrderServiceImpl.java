@@ -6,10 +6,7 @@ import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapp
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
-import com.sky.dto.OrdersConfirmDTO;
-import com.sky.dto.OrdersPageQueryDTO;
-import com.sky.dto.OrdersPaymentDTO;
-import com.sky.dto.OrdersSubmitDTO;
+import com.sky.dto.*;
 import com.sky.entity.*;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
@@ -309,5 +306,17 @@ public class OrderServiceImpl implements OrderService {
     public void confirmOrder(OrdersConfirmDTO ordersConfirmDTO) {
         orderMapper.updateById(OrdersEntity.builder().id(ordersConfirmDTO.getId()).status(CONFIRMED).build());
     }
+
+    @Transactional
+    @Override
+    public void rejectOrder(OrdersRejectionDTO ordersRejectionDTO) {
+        // 支付完成的订单才会被修改成待接单，拒单只发生在待接单里，因此需要拒单并退款
+        // 退款  weChatPayUtil.refund()
+        orderMapper.updateById(OrdersEntity.builder()
+                .id(ordersRejectionDTO.getId()).status(CANCELLED)
+                .rejectionReason(ordersRejectionDTO.getRejectionReason())
+                .build());
+    }
+
 
 }

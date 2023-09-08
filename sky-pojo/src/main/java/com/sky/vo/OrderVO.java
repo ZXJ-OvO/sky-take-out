@@ -13,12 +13,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderVO extends OrdersEntity implements Serializable {
-
     /**
      * OrderVO 继承至 OrdersEntity
      * OrderVO extends OrdersEntity
      */
-
     private String orderDishes;   //订单菜品信息
-    private List<OrderDetailEntity> orderDetailEntityList;    //订单详情
+    private List<OrderDetailEntity> orderDetailList;    //订单详情
 }

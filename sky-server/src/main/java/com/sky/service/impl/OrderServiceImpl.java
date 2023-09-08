@@ -2,7 +2,7 @@ package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.OrdersPageQueryDTO;
@@ -18,6 +18,7 @@ import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,7 +131,7 @@ public class OrderServiceImpl implements OrderService {
                 user.getOpenid() //微信用户的openid
         );
 
-        if (jsonObject.getString("code") != null && jsonObject.getString("code").equals("ORDERPAID")) {
+        if (jsonObject.getString("code") != null && "ORDERPAID".equals(jsonObject.getString("code"))) {
             throw new OrderBusinessException("该订单已支付");
         }
 
@@ -143,15 +144,14 @@ public class OrderServiceImpl implements OrderService {
     /**
      * 支付成功，修改订单状态
      *
-     * @param outTradeNo
      */
     public void paySuccess(String outTradeNo) {
         // 根据订单号查询当前用户的订单
-        OrdersEntity ordersDB = orderMapper.getByNumber(outTradeNo);
+        OrdersEntity ordersDb = orderMapper.getByNumber(outTradeNo);
 
         // 根据订单id更新订单的状态、支付方式、支付状态、结账时间
         OrdersEntity orders = OrdersEntity.builder()
-                .id(ordersDB.getId())
+                .id(ordersDb.getId())
                 .status(OrdersEntity.TO_BE_CONFIRMED)
                 .payStatus(OrdersEntity.PAID)
                 .checkoutTime(LocalDateTime.now())
@@ -163,14 +163,27 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public PageBean pageQueryHistoryOrders(OrdersPageQueryDTO ordersPageQueryDTO) {
-        int page = ordersPageQueryDTO.getPage();
-        int pageSize = ordersPageQueryDTO.getPageSize();
-        Integer status = ordersPageQueryDTO.getStatus();
-        PageHelper.startPage(page, pageSize);
-        return null;
 
+        List<OrdersEntity> ordersEntityRecords = new LambdaQueryChainWrapper<>(OrdersEntity.class)
+                .eq(OrdersEntity::getUserId, BaseContext.getCurrentId())
+                .eq(ordersPageQueryDTO.getStatus() != null, OrdersEntity::getStatus, ordersPageQueryDTO.getStatus())
+                .orderByDesc(OrdersEntity::getOrderTime)
+                .page(new Page<>(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize()))
+                .getRecords();
+
+        List<OrderVO> records = new ArrayList<>();
+
+        ordersEntityRecords.forEach(ordersEntity -> {
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(ordersEntity, orderVO);
+            orderVO.setOrderDetailList(
+                    orderDetailMapper.selectList(
+                            new LambdaQueryChainWrapper<>(OrderDetailEntity.class)
+                                    .eq(OrderDetailEntity::getOrderId, ordersEntity.getId()).getWrapper()));
+            records.add(orderVO);
+        });
+
+        long count = records.size();
+        return PageBean.builder().total(count).records(records).build();
     }
-
-
-
 }

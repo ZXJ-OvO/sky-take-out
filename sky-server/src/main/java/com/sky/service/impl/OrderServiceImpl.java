@@ -8,12 +8,13 @@ import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.*;
 import com.sky.entity.*;
-import com.sky.exception.AddressBookBusinessException;
-import com.sky.exception.OrderBusinessException;
-import com.sky.exception.ShoppingCartBusinessException;
+import com.sky.exception.*;
 import com.sky.mapper.*;
+import com.sky.properties.BaiduMapProperties;
 import com.sky.result.PageBean;
 import com.sky.service.OrderService;
+import com.sky.utils.BaiduMapUtils;
+import com.sky.utils.BigDecimalUtil;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
@@ -22,7 +23,6 @@ import com.sky.vo.OrderVO;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,10 +53,14 @@ public class OrderServiceImpl implements OrderService {
     private ShoppingCartMapper shoppingCartMapper;
     @Resource
     private AddressBookMapper addressBookMapper;
-    @Autowired
+    @Resource
     private UserMapper userMapper;
-    @Autowired
+    @Resource
     private WeChatPayUtil weChatPayUtil;
+    @Resource
+    private BaiduMapUtils baiduMapUtils;
+    @Resource
+    private BaiduMapProperties baiduMapProperties;
 
 
     @Override
@@ -76,7 +80,18 @@ public class OrderServiceImpl implements OrderService {
             throw new ShoppingCartBusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
         }
 
-        // 排除超出配送范围的情况
+        // 排除超出配送范围超出正常配送时效的情况
+        String destination = addressBookEntity.getProvinceName() + addressBookEntity.getCityName() + addressBookEntity.getDistrictName() + addressBookEntity.getDetail();
+        String target = baiduMapUtils.getCoordinate(destination);
+        String origin = baiduMapUtils.getCoordinate(baiduMapProperties.getStore());
+        Double distance = baiduMapUtils.getDistance(origin, target);
+        Integer time = baiduMapUtils.getTime(origin, target);
+        if (BigDecimalUtil.compareTo(distance, 5000.0) == 1) {
+            throw new OutBoundsOfDistanceException(MessageConstant.DISTANCE_OUT_DELIVERY_RANGE);
+        }
+        if (time > 50) {
+            throw new OutBoundsOfTimeException(MessageConstant.TIME_OUT_DELIVERY_RANGE);
+        }
 
         // 构造订单数据
         OrdersEntity ordersEntity = new OrdersEntity();

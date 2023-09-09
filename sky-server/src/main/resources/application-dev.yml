@@ -11,7 +11,7 @@ sky:
 
 baidu:
   map:
-    ak: "12T2i6lW8fFuOEDWXrO4h6H37misTYxpiV16"
+    ak: "T2i6lW8fFuOEDWXrO4h6H37misTYxpiV"
     store: "北京市海淀区上地十街10号"
 
 minio:
@@ -22,8 +22,8 @@ minio:
 
 wechat:
   #微信小程序信息
-  appid: 12wxa207b007c4fe467316
-  secret: 12a6528a669f56834ae663d26037391c7416
+  appid: wxa207b007c4fe4673
+  secret: a6528a669f56834ae663d26037391c74
 
   #微信支付信息（未获取，以下为假数据）
   mchid: 1561414331

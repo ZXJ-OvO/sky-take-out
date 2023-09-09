@@ -36,4 +36,5 @@ public class MessageConstant {
 
     public static final String DISTANCE_OUT_DELIVERY_RANGE = "订单超配送范围";
     public static final String TIME_OUT_DELIVERY_RANGE = "订单估时超过正常范围";
+    public static final String TIME_OUT_PAYMENT_RANGE = "订单估时超过正常范围";
 }

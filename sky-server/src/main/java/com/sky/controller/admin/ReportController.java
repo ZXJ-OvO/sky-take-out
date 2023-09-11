@@ -3,6 +3,7 @@ package com.sky.controller.admin;
 import com.sky.dto.TurnoverStatisticDTO;
 import com.sky.result.Result;
 import com.sky.service.ReportService;
+import com.sky.vo.OrderReportVO;
 import com.sky.vo.SalesTop10ReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
@@ -33,22 +34,26 @@ public class ReportController {
     @GetMapping("/turnoverStatistics")
     @ApiOperation("营业额统计")
     public Result<TurnoverReportVO> turnoverStatistic(TurnoverStatisticDTO turnoverStatisticDTO) {
-        TurnoverReportVO turnoverReportVO = reportService.getTurnoverReport(turnoverStatisticDTO);
-        return Result.success(turnoverReportVO);
+        return Result.success(reportService.getTurnoverReport(turnoverStatisticDTO));
+
     }
 
     @GetMapping("/userStatistics")
     @ApiOperation("用户统计")
     public Result<UserReportVO> userStatistics(TurnoverStatisticDTO turnoverStatisticDTO) {
-        UserReportVO userReportVO = reportService.getUserStatistics(turnoverStatisticDTO);
-        return Result.success(userReportVO);
+        return Result.success(reportService.getUserStatistics(turnoverStatisticDTO));
+
     }
 
     @GetMapping("/top10")
     @ApiOperation("查询销量排名top10")
     public Result<SalesTop10ReportVO> top10(TurnoverStatisticDTO turnoverStatisticDTO) {
-        SalesTop10ReportVO salesTop10ReportVO = reportService.getTop10(turnoverStatisticDTO);
-        return Result.success(salesTop10ReportVO);
+        return Result.success(reportService.getTop10(turnoverStatisticDTO));
     }
 
+    @GetMapping("/ordersStatistics")
+    @ApiOperation("用户数据统计")
+    public Result<OrderReportVO> orderStatistics(TurnoverStatisticDTO turnoverStatisticDTO) {
+        return Result.success(reportService.getOrderStatistics(turnoverStatisticDTO));
+    }
 }

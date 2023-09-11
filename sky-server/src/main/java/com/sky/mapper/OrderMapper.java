@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Select;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -34,4 +35,6 @@ public interface OrderMapper extends BaseMapper<OrdersEntity> {
     OrderStatisticsVO statistic(Integer[] statusArray);
 
     List<GoodsSalesDTO> selectTopDish(LocalDateTime begin, LocalDateTime end);
+
+    Integer countByMap(Map<String, Object> map);
 }

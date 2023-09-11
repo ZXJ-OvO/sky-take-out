@@ -4,7 +4,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * 个人优化的BigDecimal工具类
+ * @author zxj
+ * @since 2020/11/16
  */
 public class BigDecimalUtil {
 

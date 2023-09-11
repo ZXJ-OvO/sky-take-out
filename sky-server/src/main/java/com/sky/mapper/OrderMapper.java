@@ -1,10 +1,14 @@
 package com.sky.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.sky.dto.GoodsSalesDTO;
 import com.sky.entity.OrdersEntity;
 import com.sky.vo.OrderStatisticsVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 
 /**
@@ -28,4 +32,6 @@ public interface OrderMapper extends BaseMapper<OrdersEntity> {
     void update(OrdersEntity orders);
 
     OrderStatisticsVO statistic(Integer[] statusArray);
+
+    List<GoodsSalesDTO> selectTopDish(LocalDateTime begin, LocalDateTime end);
 }

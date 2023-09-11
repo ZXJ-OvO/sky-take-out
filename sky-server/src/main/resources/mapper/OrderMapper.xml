@@ -46,4 +46,19 @@
         FROM orders
         WHERE `status` IN (#{statusArray[0]}, #{statusArray[1]}, #{statusArray[2]})
     </select>
+
+    <select id="selectTopDish" resultType="com.sky.dto.GoodsSalesDTO">
+        SELECT order_detail.`name`,
+               SUM(order_detail.number) as number
+        FROM order_detail,
+             orders
+        WHERE orders.id = order_detail.order_id
+          and orders.`status` = 5
+          AND orders.order_time BETWEEN #{begin} AND #{end}
+        GROUP BY order_detail.`name`
+        order by number desc
+        limit 0, 10
+    </select>
+
+
 </mapper>

@@ -3,6 +3,7 @@ package com.sky.controller.admin;
 import com.sky.dto.TurnoverStatisticDTO;
 import com.sky.result.Result;
 import com.sky.service.ReportService;
+import com.sky.vo.SalesTop10ReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import io.swagger.annotations.Api;
@@ -42,4 +43,12 @@ public class ReportController {
         UserReportVO userReportVO = reportService.getUserStatistics(turnoverStatisticDTO);
         return Result.success(userReportVO);
     }
+
+    @GetMapping("/top10")
+    @ApiOperation("查询销量排名top10")
+    public Result<SalesTop10ReportVO> top10(TurnoverStatisticDTO turnoverStatisticDTO) {
+        SalesTop10ReportVO salesTop10ReportVO = reportService.getTop10(turnoverStatisticDTO);
+        return Result.success(salesTop10ReportVO);
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.sky.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.sky.dto.GoodsSalesDTO;
 import com.sky.dto.TurnoverStatisticDTO;
 import com.sky.entity.OrdersEntity;
 import com.sky.entity.UserEntity;
@@ -8,6 +9,7 @@ import com.sky.exception.InvalidFieldException;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
+import com.sky.vo.SalesTop10ReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -137,5 +140,24 @@ public class ReportServiceImpl implements ReportService {
                 .build();
     }
 
+    /**
+     * 查询销量排名top10
+     *
+     * @param turnoverStatisticDTO 查询条件：开始日期、结束日期
+     * @return 销量排名top10
+     */
+    @Override
+    public SalesTop10ReportVO getTop10(TurnoverStatisticDTO turnoverStatisticDTO) {
 
+        List<GoodsSalesDTO> list = orderMapper.selectTopDish(turnoverStatisticDTO.getBegin().atStartOfDay(),
+                turnoverStatisticDTO.getEnd().atStartOfDay());
+
+        List<String> nameList = list.stream().map(GoodsSalesDTO::getName).collect(Collectors.toList());
+        List<Integer> numberList = list.stream().map(GoodsSalesDTO::getNumber).collect(Collectors.toList());
+
+        return SalesTop10ReportVO.builder()
+                .nameList(StringUtils.join(nameList, ","))
+                .numberList(StringUtils.join(numberList, ","))
+                .build();
+    }
 }

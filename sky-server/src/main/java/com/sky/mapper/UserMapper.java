@@ -5,6 +5,8 @@ import com.sky.entity.UserEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.Map;
+
 /**
  * @author zxj
  */
@@ -18,4 +20,6 @@ public interface UserMapper extends BaseMapper<UserEntity> {
      */
     @Select("select * from user where id = #{userId}")
     UserEntity getById(Long userId);
+
+    Integer countByMap(Map map);
 }

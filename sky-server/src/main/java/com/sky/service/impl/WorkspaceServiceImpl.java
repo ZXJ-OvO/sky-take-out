@@ -1,11 +1,13 @@
 package com.sky.service.impl;
 
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+import com.sky.entity.DishEntity;
 import com.sky.entity.OrdersEntity;
 import com.sky.entity.UserEntity;
 import com.sky.service.WorkspaceService;
 import com.sky.utils.BigDecimalUtil;
 import com.sky.vo.BusinessDataVO;
+import com.sky.vo.DishOverViewVO;
 import com.sky.vo.OrderOverViewVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -78,52 +80,59 @@ public class WorkspaceServiceImpl implements WorkspaceService {
      */
     @Override
     public OrderOverViewVO getOverviewOrders() {
-        // 全部订单
-        int allOrders = new LambdaQueryChainWrapper<>(OrdersEntity.class)
-                .select(OrdersEntity::getId)
-                .between(OrdersEntity::getOrderTime, LocalDateTime.now().withHour(0).withMinute(0).withSecond(0), LocalDateTime.now())
-                .count()
-                .intValue();
-
-
-        // 已取消订单
-        int canceledOrders = new LambdaQueryChainWrapper<>(OrdersEntity.class)
-                .select(OrdersEntity::getId)
-                .between(OrdersEntity::getOrderTime, LocalDateTime.now().withHour(0).withMinute(0).withSecond(0), LocalDateTime.now())
-                .eq(OrdersEntity::getStatus, OrdersEntity.CANCELLED)
-                .count()
-                .intValue();
-
-        // 已完成订单
-        int completedOrders = new LambdaQueryChainWrapper<>(OrdersEntity.class)
-                .select(OrdersEntity::getId)
-                .between(OrdersEntity::getOrderTime, LocalDateTime.now().withHour(0).withMinute(0).withSecond(0), LocalDateTime.now())
-                .eq(OrdersEntity::getStatus, OrdersEntity.COMPLETED)
-                .count()
-                .intValue();
-
-        // 待派送订单
-        int deliveredOrders = new LambdaQueryChainWrapper<>(OrdersEntity.class)
-                .select(OrdersEntity::getId)
-                .between(OrdersEntity::getOrderTime, LocalDateTime.now().withHour(0).withMinute(0).withSecond(0), LocalDateTime.now())
-                .eq(OrdersEntity::getStatus, OrdersEntity.CONFIRMED)
-                .count()
-                .intValue();
-
-        // 待接单订单
-        int waitingOrders = new LambdaQueryChainWrapper<>(OrdersEntity.class)
-                .select(OrdersEntity::getId)
-                .between(OrdersEntity::getOrderTime, LocalDateTime.now().withHour(0).withMinute(0).withSecond(0), LocalDateTime.now())
-                .eq(OrdersEntity::getStatus, OrdersEntity.TO_BE_CONFIRMED)
-                .count()
-                .intValue();
 
         return OrderOverViewVO.builder()
-                .allOrders(allOrders)
-                .cancelledOrders(canceledOrders)
-                .completedOrders(completedOrders)
-                .deliveredOrders(deliveredOrders)
-                .waitingOrders(waitingOrders)
+                .allOrders(new LambdaQueryChainWrapper<>(OrdersEntity.class)
+                        .select(OrdersEntity::getId)
+                        .between(OrdersEntity::getOrderTime, LocalDateTime.now().withHour(0).withMinute(0).withSecond(0), LocalDateTime.now())
+                        .count()
+                        .intValue())
+                .cancelledOrders(new LambdaQueryChainWrapper<>(OrdersEntity.class)
+                        .select(OrdersEntity::getId)
+                        .between(OrdersEntity::getOrderTime, LocalDateTime.now().withHour(0).withMinute(0).withSecond(0), LocalDateTime.now())
+                        .eq(OrdersEntity::getStatus, OrdersEntity.CANCELLED)
+                        .count()
+                        .intValue())
+                .completedOrders(new LambdaQueryChainWrapper<>(OrdersEntity.class)
+                        .select(OrdersEntity::getId)
+                        .between(OrdersEntity::getOrderTime, LocalDateTime.now().withHour(0).withMinute(0).withSecond(0), LocalDateTime.now())
+                        .eq(OrdersEntity::getStatus, OrdersEntity.COMPLETED)
+                        .count()
+                        .intValue())
+                .deliveredOrders(new LambdaQueryChainWrapper<>(OrdersEntity.class)
+                        .select(OrdersEntity::getId)
+                        .between(OrdersEntity::getOrderTime, LocalDateTime.now().withHour(0).withMinute(0).withSecond(0), LocalDateTime.now())
+                        .eq(OrdersEntity::getStatus, OrdersEntity.CONFIRMED)
+                        .count()
+                        .intValue())
+                .waitingOrders(new LambdaQueryChainWrapper<>(OrdersEntity.class)
+                        .select(OrdersEntity::getId)
+                        .between(OrdersEntity::getOrderTime, LocalDateTime.now().withHour(0).withMinute(0).withSecond(0), LocalDateTime.now())
+                        .eq(OrdersEntity::getStatus, OrdersEntity.TO_BE_CONFIRMED)
+                        .count()
+                        .intValue())
+                .build();
+    }
+
+    /**
+     * 查询菜品管理数据
+     *
+     * @return DishOverViewVO
+     */
+    @Override
+    public DishOverViewVO getOverviewDishes() {
+
+        return DishOverViewVO.builder()
+                .sold(new LambdaQueryChainWrapper<>(DishEntity.class)
+                        .select(DishEntity::getId)
+                        .eq(DishEntity::getStatus, 1)
+                        .count()
+                        .intValue())
+                .discontinued(new LambdaQueryChainWrapper<>(DishEntity.class)
+                        .select(DishEntity::getId)
+                        .eq(DishEntity::getStatus, 0)
+                        .count()
+                        .intValue())
                 .build();
     }
 }

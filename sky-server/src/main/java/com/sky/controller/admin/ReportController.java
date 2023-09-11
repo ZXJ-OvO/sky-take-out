@@ -1,9 +1,17 @@
 package com.sky.controller.admin;
 
+import com.sky.dto.TurnoverStatisticDTO;
+import com.sky.result.Result;
+import com.sky.service.ReportService;
+import com.sky.vo.TurnoverReportVO;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 @RestController
 @RequestMapping("/admin/report")
@@ -11,4 +19,19 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "统计分析相关接口")
 public class ReportController {
 
+    @Resource
+    private ReportService reportService;
+
+    /**
+     * 营业额统计
+     *
+     * @param turnoverStatisticDTO 查询条件：开始日期、结束日期
+     * @return 营业额统计结果
+     */
+    @GetMapping("/turnoverStatistics")
+    @ApiOperation("营业额统计")
+    public Result<TurnoverReportVO> turnoverStatistic(TurnoverStatisticDTO turnoverStatisticDTO) {
+        TurnoverReportVO turnoverReportVO = reportService.getTurnoverReport(turnoverStatisticDTO);
+        return Result.success(turnoverReportVO);
+    }
 }

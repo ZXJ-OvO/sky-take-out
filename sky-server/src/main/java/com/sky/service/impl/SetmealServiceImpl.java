@@ -95,7 +95,7 @@ public class SetmealServiceImpl implements SetmealService {
     }
 
     @Override
-    @Cacheable(cacheNames = "setmealCache", key = "#categoryId")
+    //@Cacheable(cacheNames = "setmealCache", key = "#categoryId")
     public SetmealVO selectById(Long id) {
         // 根据id查询套餐
         SetmealEntity entity = setmealMapper.selectById(id);

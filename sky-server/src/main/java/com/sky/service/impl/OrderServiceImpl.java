@@ -279,7 +279,18 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void urgedOrderById(Long id) {
-        // TODO: 2023/9/8 催单
+        OrdersEntity ordersDb = orderMapper.selectById(id);
+
+        if (ordersDb == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        HashMap map = new HashMap();
+        map.put("type", 2);
+        map.put("orderId", ordersDb.getId());
+        map.put("content", "订单号：" + ordersDb.getNumber());
+        String json = JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(json);
     }
 
     @Override
@@ -325,6 +336,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderStatisticsVO statisticsEachItemNumber() {
         return orderMapper.statistic(new Integer[]{TO_BE_CONFIRMED, CONFIRMED, DELIVERY_IN_PROGRESS});
     }
+
 
     @Override
     public OrderVO getDetailsById(Long id) {

@@ -3,12 +3,14 @@ package com.sky.service.impl;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.sky.entity.DishEntity;
 import com.sky.entity.OrdersEntity;
+import com.sky.entity.SetmealEntity;
 import com.sky.entity.UserEntity;
 import com.sky.service.WorkspaceService;
 import com.sky.utils.BigDecimalUtil;
 import com.sky.vo.BusinessDataVO;
 import com.sky.vo.DishOverViewVO;
 import com.sky.vo.OrderOverViewVO;
+import com.sky.vo.SetmealOverViewVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -131,6 +133,27 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                 .discontinued(new LambdaQueryChainWrapper<>(DishEntity.class)
                         .select(DishEntity::getId)
                         .eq(DishEntity::getStatus, 0)
+                        .count()
+                        .intValue())
+                .build();
+    }
+
+    /**
+     * 查询套餐管理数据
+     *
+     * @return SetmealOverViewVO
+     */
+    @Override
+    public SetmealOverViewVO getOverviewSetMeals() {
+        return SetmealOverViewVO.builder()
+                .sold(new LambdaQueryChainWrapper<>(SetmealEntity.class)
+                        .select(SetmealEntity::getId)
+                        .eq(SetmealEntity::getStatus, 1)
+                        .count()
+                        .intValue())
+                .discontinued(new LambdaQueryChainWrapper<>(SetmealEntity.class)
+                        .select(SetmealEntity::getId)
+                        .eq(SetmealEntity::getStatus, 0)
                         .count()
                         .intValue())
                 .build();

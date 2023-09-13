@@ -23,4 +23,9 @@ public class ShopServiceImpl implements ShopService {
     public Integer getStatus() {
         return (Integer) redisTemplate.opsForValue().get(RedisConstant.SHOP_STATUS);
     }
+
+    @Override
+    public void setStatus(Integer status) {
+        redisTemplate.opsForValue().set(RedisConstant.SHOP_STATUS, status);
+    }
 }

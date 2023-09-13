@@ -4,9 +4,7 @@ import com.sky.result.Result;
 import com.sky.service.ShopService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -25,6 +23,12 @@ public class ShopController {
     @GetMapping("/status")
     public Result<Integer> getStatus() {
         return Result.success(shopService.getStatus());
+    }
+
+    @PutMapping("/{status}")
+    public Result<String> setStatus(@PathVariable Integer status) {
+        shopService.setStatus(status);
+        return Result.success();
     }
 }
 

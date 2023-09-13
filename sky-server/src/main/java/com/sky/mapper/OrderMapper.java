@@ -37,4 +37,6 @@ public interface OrderMapper extends BaseMapper<OrdersEntity> {
     List<GoodsSalesDTO> selectTopDish(LocalDateTime begin, LocalDateTime end);
 
     Integer countByMap(Map<String, Object> map);
+
+    Double sumByMap(Map<String, Object> map);
 }

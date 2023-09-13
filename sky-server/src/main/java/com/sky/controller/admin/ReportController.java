@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/admin/report")
@@ -55,5 +57,12 @@ public class ReportController {
     @ApiOperation("用户数据统计")
     public Result<OrderReportVO> orderStatistics(TurnoverStatisticDTO turnoverStatisticDTO) {
         return Result.success(reportService.getOrderStatistics(turnoverStatisticDTO));
+    }
+
+    @GetMapping("/export")
+    @ApiOperation("用户数据统计")
+    public Result<String> export(HttpServletResponse httpServletResponse) {
+        reportService.getExport(httpServletResponse);
+        return Result.success();
     }
 }

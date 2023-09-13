@@ -166,8 +166,15 @@ public class ReportServiceImpl implements ReportService {
                 .build();
     }
 
+    /**
+     * 订单统计
+     *
+     * @param turnoverStatisticDTO 查询条件：开始日期、结束日期
+     * @return 订单统计结果
+     */
     @Override
     public OrderReportVO getOrderStatistics(TurnoverStatisticDTO turnoverStatisticDTO) {
+
         LocalDate begin = turnoverStatisticDTO.getBegin();
         LocalDate end = turnoverStatisticDTO.getEnd();
 

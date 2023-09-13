@@ -24,6 +24,8 @@ import com.sky.service.DishService;
 import com.sky.vo.DishVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +34,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author zxj
@@ -48,8 +51,22 @@ public class DishServiceImpl implements DishService {
 
     @Resource
     private SetmealDishMapper setmealDishMapper;
+
     @Resource
     private SetmealMapper setmealMapper;
+
+    @Resource
+    private RedisTemplate redisTemplate;
+
+    /**
+     * 清理缓存数据
+     *
+     * @param pattern
+     */
+    private void cleanCache(String pattern) {
+        Set keys = redisTemplate.keys(pattern);
+        redisTemplate.delete(keys);
+    }
 
     /**
      * 菜品状态
@@ -76,6 +93,9 @@ public class DishServiceImpl implements DishService {
                 setmealMapper.updateById(setmealEntity);
             }
         }
+
+        //将所有的菜品缓存数据清理掉，所有以dish_开头的key
+        cleanCache("dish_*");
 
     }
 
@@ -142,6 +162,11 @@ public class DishServiceImpl implements DishService {
                 dishFlavorMapper.insert(dishFlavor);
             });
         }
+
+        //清理缓存数据
+        String key = "dish_" + dishDTO.getCategoryId();
+        cleanCache(key);
+
     }
 
     /**
@@ -221,8 +246,17 @@ public class DishServiceImpl implements DishService {
             setmealDishEntity.setPrice(price);
             setmealDishMapper.updateById(setmealDishEntity);
         });
+
+        //将所有的菜品缓存数据清理掉，所有以dish_开头的key
+        cleanCache("dish_*");
     }
 
+    /**
+     * （管理端）根据菜品分类id查询菜品
+     *
+     * @param categoryId 菜品分类id
+     * @return 根据分类id查出来的分类下的所有菜品/套餐数据
+     */
     @Override
     public List<DishEntity> listByCategoryId(Long categoryId) {
         return new LambdaQueryChainWrapper<>(dishMapper)
@@ -230,13 +264,27 @@ public class DishServiceImpl implements DishService {
                 .list();
     }
 
+    /**
+     * （用户端）根据菜品分类id查询菜品
+     *
+     * @param categoryId 菜品/套餐分类id
+     * @return 根据分类id查出来的分类下的所有菜品/套餐数据
+     */
     @Override
+    @Cacheable(cacheNames = "setmeal:list", key = "#categoryId", unless = "#result.size() <= 0")
     public List<DishVO> selectByCategoryId(Long categoryId) {
+
+        // 查数据库
         LambdaQueryWrapper<DishEntity> lambdaQueryWrapper = new LambdaQueryWrapper<DishEntity>()
                 .eq(DishEntity::getCategoryId, categoryId)
                 .eq(DishEntity::getStatus, 1);
         List<DishEntity> entities = dishMapper.selectList(lambdaQueryWrapper);
-        ArrayList<DishVO> dishVos = new ArrayList<>();
+
+        if (entities == null || entities.isEmpty()) {
+            return null;
+        }
+
+        List<DishVO> dishVos = new ArrayList<>();
         for (DishEntity entity : entities) {
             DishVO dishVO = new DishVO();
             BeanUtils.copyProperties(entity, dishVO);
@@ -251,6 +299,4 @@ public class DishServiceImpl implements DishService {
 
         return dishVos;
     }
-
-
 }

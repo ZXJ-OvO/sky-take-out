@@ -1,16 +1,18 @@
 package com.sky.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * 菜品口味
+ * @author zxj
  */
 @Data
 @Builder
@@ -26,6 +28,4 @@ public class DishFlavorEntity implements Serializable {
     private Long dishId;//菜品id
     private String name;    //口味名称
     private String value;    //口味数据list
-//    @TableField(exist = false, fill = FieldFill.INSERT_UPDATE, value = "update_time")
-//    private LocalDateTime updateTime;
 }

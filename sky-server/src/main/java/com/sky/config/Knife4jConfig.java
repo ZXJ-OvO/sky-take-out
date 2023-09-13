@@ -12,7 +12,7 @@ import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
 @Slf4j
-public class Knife4jConfiguration {
+public class Knife4jConfig {
 
     /**
      * 通过knife4j生成接口文档：管理端接口文件

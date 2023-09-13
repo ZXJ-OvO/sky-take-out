@@ -8,5 +8,9 @@
         from employee
         where username = #{username}
     </select>
+    <select id="selectAll" resultType="com.sky.entity.EmployeeEntity">
+        select *
+        from employee
+    </select>
 
 </mapper>

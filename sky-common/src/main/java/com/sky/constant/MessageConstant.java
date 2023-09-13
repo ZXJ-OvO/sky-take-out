@@ -33,4 +33,8 @@ public class MessageConstant {
     public static final String ACCOUNT_DISABLED = "账号被禁用";
     public static final String DUPLICATE_USERNAME = "用户名重复";
     public static final String DISH_NOT_EXIST = "菜品不存在";
+
+    public static final String DISTANCE_OUT_DELIVERY_RANGE = "订单超配送范围";
+    public static final String TIME_OUT_DELIVERY_RANGE = "订单估时超过正常范围";
+    public static final String TIME_OUT_PAYMENT_RANGE = "订单估时超过正常范围";
 }

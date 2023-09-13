@@ -15,7 +15,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * @date 2023/08/26 14:47
  */
 @Configuration
-public class RedisConfiguration {
+public class RedisConfig {
 
     @Bean
     public RedisTemplate redisTemplate(RedisConnectionFactory redisConnectionFactory) {
@@ -27,7 +27,7 @@ public class RedisConfiguration {
 
         // 设置redis key-value的序列化器
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        // redisTemplate.setValueSerializer(new StringRedisSerializer());
 
         return redisTemplate;
     }

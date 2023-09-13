@@ -7,6 +7,9 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * @author zxj
+ */
 @Data
 public class OrdersSubmitDTO implements Serializable {
 

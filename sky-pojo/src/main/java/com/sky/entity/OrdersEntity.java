@@ -1,5 +1,6 @@
 package com.sky.entity;
 
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,11 +12,13 @@ import java.time.LocalDateTime;
 
 /**
  * 订单
+ * @author root
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@TableName("orders")
 public class OrdersEntity implements Serializable {
 
     //订单状态 1待付款 2待接单 3已接单 4派送中 5已完成 6已取消
@@ -25,6 +28,7 @@ public class OrdersEntity implements Serializable {
     public static final Integer DELIVERY_IN_PROGRESS = 4;
     public static final Integer COMPLETED = 5;
     public static final Integer CANCELLED = 6;
+    public static final Integer ORDER_REFUND = 7;
 
     //支付状态 0未支付 1已支付 2退款
     public static final Integer UN_PAID = 0;
@@ -33,11 +37,13 @@ public class OrdersEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @TableId(type = IdType.AUTO)
     private Long id;
     private String number;    //订单号
     private Integer status;    //订单状态 1待付款 2待接单 3已接单 4派送中 5已完成 6已取消 7退款
     private Long userId;    //下单用户id
     private Long addressBookId;    //地址id
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime orderTime;    //下单时间
     private LocalDateTime checkoutTime;    //结账时间
     private Integer payMethod;    //支付方式 1微信，2支付宝

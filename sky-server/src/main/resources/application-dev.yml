@@ -9,6 +9,11 @@ sky:
     user-token-name: authentication
     user-ttl: 1296000000
 
+baidu:
+  map:
+    ak: "T2i6lW8fFuOEDWXrO4h6H37misTYxpiV"
+    store: "北京市海淀区上地十街10号"
+
 minio:
   endpoint: http://127.0.0.1:9090 #Minio服务所在地址
   bucketName: sky-take-out #存储桶名称
@@ -16,5 +21,15 @@ minio:
   secretKey: HPA2hP289vNst7jUA8fALib1ydgOxWpi8kyowncf #访问的秘钥
 
 wechat:
+  #微信小程序信息
   appid: wxa207b007c4fe4673
   secret: a6528a669f56834ae663d26037391c74
+
+  #微信支付信息（未获取，以下为假数据）
+  mchid: 1561414331
+  mchSerialNo: 4B3B3DC35414AD50B1B755BAF8DE9CC7CF407606
+  apiV3Key: CZBK51236435wxpay435434323FFDuv3
+  privateKeyFilePath: D:\project\java\sky-take-out\sky-server\src\main\resources\apiclient_key.pem
+  weChatPayCertFilePath: D:\project\java\sky-take-out\sky-server\src\main\resources\wechatpay_166D96F876F45C7D07CE98952A96EC980368ACFC.pem
+  notifyUrl: https://14164a59.cpolar.io/notify/paySuccess  # 内网穿透地址，支付成功回调地址
+  refundNotifyUrl: https://14164a59.cpolar.io/notify/refundSuccess # 内网穿透地址，退款成功回调地址

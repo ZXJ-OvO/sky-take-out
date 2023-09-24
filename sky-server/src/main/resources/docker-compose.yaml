@@ -1,0 +1,37 @@
+version: "3.2"
+
+services:
+  mysql:
+    restart: always
+    image: mysql:5.7-debian
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: 123456
+    volumes:
+      - "/usr/local/mysql/log:/mydata/mysql/log"
+      - "/usr/local/mysql/data:/mydata/mysql/data"
+      - "/usr/local/mysql/conf:/mydata/mysql/conf.d"
+
+  redis:
+    image: redis:7.0.11-bullseye
+    restart: always
+    container_name: redis
+    privileged: true
+    ports:
+      - 6379:6379
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - /usr/local/redis/data:/mydata/redis/data
+      - /usr/local/redis/conf/redis.conf:/mydata/redis/conf
+    #      - /usr/local/redis/logs:/usr/local/redis/logs
+    command: [ "redis-server","/usr/local/redis/conf/redis.conf" ]
+
+  sky-server:
+    container_name: sky-server
+    build: ./
+    ports:
+      - "8080:8080"

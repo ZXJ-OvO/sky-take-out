@@ -32,6 +32,6 @@ services:
 
   sky-server:
     container_name: sky-server
-    build: ./
+    build: ../sky-pojo/src/main/java
     ports:
       - "8080:8080"

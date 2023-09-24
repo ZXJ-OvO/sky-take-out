@@ -1,4 +1,4 @@
-FROM openjdk:11-jre
+FROM openjdk:11
 
 COPY ./sky-server-1.0-SNAPSHOT.jar /tmp/app.jar
 
